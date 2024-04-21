@@ -3,7 +3,7 @@
 # ==UserScript==
 # @name         mkshrc
 # @namespace    https://github.com/hyugogirubato/mkshrc
-# @version      1.0
+# @version      1.6
 # @description  Make an advanced shell environment for Android devices
 # @author       hyugogirubato
 # @match        Android
@@ -101,7 +101,7 @@ tree() {
 
 # Custom find command that displays colored results
 cfind() {
-  if ls --color=auto >/dev/null 2>&1; then
+  if ls --color=auto $TMPDIR >/dev/null 2>&1; then
     find "${1:-.}" -print0 | xargs -0 ls -d1 --color=auto
   else
     echo 'Unsupported XTerm environment' >&2; return 1
@@ -110,14 +110,22 @@ cfind() {
 
 # Simulate 'man' command
 man() {
-  [ -z "$1" ] && { echo -e "What manual page do you want?\nFor example, try 'man ls'." >&2; return 1; }
-  "$1" --help
+  [ -z "$1" ] && { echo "What manual page do you want?\nFor example, try 'man ls'." >&2; return 1; }
+  local cmd=$(command -v "$1")
+
+  # Check if command starts with 'alias' using grep and extract the aliased command
+  if echo "$cmd" | grep -q "^alias "; then
+    cmd=$(echo "$cmd" | grep -o "^alias .*$" | cut -d"'" -f2)
+  fi
+
+  # Check and display the help, providing a fallback message if the help cannot be displayed
+  $cmd --help >/dev/null 2>&1 && $cmd --help || { echo "No manual entry for $1" >&2; return 16; }
 }
 
 # Define a sudo-like function
 sudo() {
   if [ "$(id -u)" -eq 0 ]; then
-    "$@"
+    $*
   elif which su >/dev/null 2>&1; then
     su -c "$*"
   else
