@@ -2,8 +2,8 @@
 
 # ==UserScript==
 # @name         mkshrc
-# @namespace    https://github.com/hyugogirubato/KeyDive
-# @version      2024.04.21
+# @namespace    https://github.com/hyugogirubato/mkshrc
+# @version      1.0
 # @description  Make an advanced shell environment for Android devices
 # @author       hyugogirubato
 # @match        Android
