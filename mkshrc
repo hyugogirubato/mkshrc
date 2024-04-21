@@ -3,7 +3,7 @@
 # ==UserScript==
 # @name         mkshrc
 # @namespace    https://github.com/hyugogirubato/mkshrc
-# @version      1.6
+# @version      1.7
 # @description  Make an advanced shell environment for Android devices
 # @author       hyugogirubato
 # @match        Android
@@ -14,7 +14,7 @@
 export HOSTNAME=$(getprop ro.boot.serialno)
 export USER=$(id -u -n)
 export LOGNAME=$USER
-export TMPDIR=${TMPDIR:-/data/local/tmp}
+export TMPDIR=${TMPDIR:-'/data/local/tmp'}
 
 
 # Find the architecture of the Android device using CPU ABI
@@ -96,13 +96,44 @@ alias rm='rm -rf'
 # Display directory tree
 tree() {
   # Source: https://stackoverflow.com/questions/18014779/similar-command-to-linux-tree-command-in-adb-shell
-  find "${1:-.}" -print | sort | sed 's;[^/]*/;|---;g;s;---|; |;g'
+  local parent=${1:-.}
+
+  local files=0
+  local dirs=0
+  local status=0
+  if [ -d "$parent" -a -r "$parent" ]; then
+    # Create a temporary file
+    local tempfile=$(mktemp)
+
+    # Store sorted find results in a temporary file
+    find "$parent" | sort > "$tempfile"
+
+    # Read from the temporary file
+    while IFS= read -r path; do
+      if [ -f "$path" ]; then
+        ((files++))
+      elif [ -d "$path" ]; then
+        ((dirs++))
+      fi
+      echo "$path" | sed 's;[^/]*/;├── ;g;s;── ├;   │;g;s;├   ;│   ;g;s;│──;├──;g'
+    done < "$tempfile"
+
+    # Remove the temporary file
+    rm "$tempfile"
+    ((dirs--))
+  else
+    echo "$parent  [error opening dir]"
+    status=2
+  fi
+
+  echo -e "\n$dirs directories, $files files"
+  return $status
 }
 
 # Custom find command that displays colored results
 cfind() {
   if ls --color=auto $TMPDIR >/dev/null 2>&1; then
-    find "${1:-.}" -print0 | xargs -0 ls -d1 --color=auto
+    find "${1:-'.'}" -print0 | xargs -0 ls -d1 --color=auto
   else
     echo 'Unsupported XTerm environment' >&2; return 1
   fi
@@ -110,7 +141,7 @@ cfind() {
 
 # Simulate 'man' command
 man() {
-  [ -z "$1" ] && { echo "What manual page do you want?\nFor example, try 'man ls'." >&2; return 1; }
+  [ -z "$1" ] && { echo -e "What manual page do you want?\nFor example, try 'man ls'." >&2; return 1; }
   local cmd=$(command -v "$1")
 
   # Check if command starts with 'alias' using grep and extract the aliased command
