@@ -3,7 +3,7 @@
 # ==UserScript==
 # @name         mkshrc
 # @namespace    https://github.com/hyugogirubato/mkshrc
-# @version      1.7
+# @version      1.8
 # @description  Make an advanced shell environment for Android devices
 # @author       hyugogirubato
 # @match        Android
@@ -78,7 +78,7 @@ fi
 
 # Enhance command output with color support if available
 if ls --color=auto >/dev/null 2>&1; then
-  alias ls='ls --color=always'
+  alias ls='ls --color=auto'
   alias grep='grep --color=auto'
   alias fgrep='fgrep --color=auto'
   alias egrep='egrep --color=auto'
@@ -147,6 +147,8 @@ man() {
   # Check if command starts with 'alias' using grep and extract the aliased command
   if echo "$cmd" | grep -q "^alias "; then
     cmd=$(echo "$cmd" | grep -o "^alias .*$" | cut -d"'" -f2)
+    # Remove any arguments that the alias may contain
+    cmd=$(echo "$cmd" | cut -d '-' -f1)
   fi
 
   # Check and display the help, providing a fallback message if the help cannot be displayed
