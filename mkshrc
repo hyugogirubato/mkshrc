@@ -3,7 +3,7 @@
 # ==UserScript==
 # @name         mkshrc
 # @namespace    https://github.com/hyugogirubato/mkshrc
-# @version      1.8
+# @version      1.9
 # @description  Make an advanced shell environment for Android devices
 # @author       hyugogirubato
 # @match        Android
@@ -103,6 +103,7 @@ tree() {
   local status=0
   if [ -d "$parent" -a -r "$parent" ]; then
     # Create a temporary file
+    rm -rf $TMPDIR/tmp.* 2>/dev/null
     local tempfile=$(mktemp)
 
     # Store sorted find results in a temporary file
@@ -110,12 +111,11 @@ tree() {
 
     # Read from the temporary file
     while IFS= read -r path; do
-      if [ -f "$path" ]; then
-        ((files++))
-      elif [ -d "$path" ]; then
-        ((dirs++))
+      if [ "$(realpath "$path" )" != "$tempfile" ]; then
+        [ -f "$path" ] && ((files++))
+        [ -d "$path" ] && ((dirs++))
+        echo "$path" | sed 's;[^/]*/;├── ;g;s;── ├;   │;g;s;├   ;│   ;g;s;│──;├──;g'
       fi
-      echo "$path" | sed 's;[^/]*/;├── ;g;s;── ├;   │;g;s;├   ;│   ;g;s;│──;├──;g'
     done < "$tempfile"
 
     # Remove the temporary file
