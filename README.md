@@ -62,8 +62,6 @@
 
 ## Usage Notes
 
-## Usage Notes
-
 Due to the nature of the default Android shell, typical initialization files like `.bashrc` or `.profile` do not exist. To ensure the enhancements and functions provided by `mkshrc` are available across all shell sessions, you need to manually source the script each time you open a new shell session. Here's how you can do it:
 
 ```bash
