@@ -52,10 +52,8 @@ if [ ! -f "$busybox" ]; then
 fi
 
 # Create aliases for BusyBox commands
-for bin in $($busybox --list); do
-  if [ "$bin" != 'man' ]; then
-    alias "$bin"="$busybox $bin" 2>/dev/null
-  fi
+for bin in $($busybox --list | grep -vE '^man$'); do
+  alias "$bin"="$busybox $bin" 2>/dev/null
 done
 
 # Handle Frida installation if Magisk is not installed
@@ -120,7 +118,7 @@ man() {
 sudo() {
   if [ "$(id -u)" -eq 0 ]; then
     "$@"
-  elif command -v su >/dev/null 2>&1; then
+  elif which su >/dev/null 2>&1; then
     su -c "$*"
   else
     echo 'su binary not found' >&2; return 127
@@ -152,7 +150,7 @@ frida-start() {
     if [ -d '/sbin/.magisk/' ]; then
       echo 'Use Magisk to start Frida' >&2; return 1
     else
-      command -v setenforce >/dev/null 2>&1 && sudo setenforce 0 >/dev/null 2>&1
+      sudo setenforce 0 >/dev/null 2>&1
       sudo frida-server -D "$@" || { echo 'Failed to start Frida' >&2; return 1; }
     fi
   else
