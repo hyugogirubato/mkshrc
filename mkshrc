@@ -3,7 +3,7 @@
 # ==UserScript==
 # @name         mkshrc
 # @namespace    https://github.com/hyugogirubato/mkshrc
-# @version      1.9
+# @version      1.10
 # @description  Make an advanced shell environment for Android devices
 # @author       hyugogirubato
 # @match        Android
@@ -18,7 +18,7 @@ export TMPDIR=${TMPDIR:-'/data/local/tmp'}
 
 
 # Find the architecture of the Android device using CPU ABI
-find_arch() {
+_arch() {
   # Source: https://github.com/Magisk-Modules-Repo/busybox-ndk/blob/master/customize.sh#L314C1-L334C2
   local abi=$(getprop ro.product.cpu.abi)
   case $abi in
@@ -34,7 +34,7 @@ find_arch() {
 
 
 # Initialize the architecture
-find_arch
+_arch
 
 # Define and verify the path to the BusyBox binary
 busybox='/sbin/.magisk/busybox/busybox'
@@ -83,7 +83,8 @@ if ls --color=auto >/dev/null 2>&1; then
   alias fgrep='fgrep --color=auto'
   alias egrep='egrep --color=auto'
   alias logcat='logcat -v color'
-  alias ip='ip -c'
+  alias ip='ip --color=auto'
+  alias diff='diff --color=auto'
 fi
 
 # Define commonly used aliases
@@ -96,7 +97,7 @@ alias rm='rm -rf'
 # Display directory tree
 tree() {
   # Source: https://stackoverflow.com/questions/18014779/similar-command-to-linux-tree-command-in-adb-shell
-  local parent=${1:-.}
+  local parent="${1:-.}"
 
   local files=0
   local dirs=0
@@ -107,7 +108,7 @@ tree() {
     local tempfile=$(mktemp)
 
     # Store sorted find results in a temporary file
-    find "$parent" | sort > "$tempfile"
+    find "$parent" 2>/dev/null | sort > "$tempfile"
 
     # Read from the temporary file
     while IFS= read -r path; do
@@ -133,36 +134,54 @@ tree() {
 # Custom find command that displays colored results
 cfind() {
   if ls --color=auto $TMPDIR >/dev/null 2>&1; then
-    find "${1:-'.'}" -print0 | xargs -0 ls -d1 --color=auto
+    find "${1:-.}" -print0 | xargs -0 ls -d1 --color=auto
   else
     echo 'Unsupported XTerm environment' >&2; return 1
   fi
 }
 
+_resolve() {
+  local bin=$(command -v "$1")
+
+  # Check if command starts with 'alias' using grep and extract the aliased command
+  if echo "$bin" | grep -q "^alias "; then
+    bin=$(echo "$bin" | grep -o "^alias .*$" | cut -d "'" -f2)
+    # Remove any arguments that the alias may contain
+    bin=$(echo "$bin" | cut -d '-' -f1)
+  fi
+  echo "$bin"
+}
+
 # Simulate 'man' command
 man() {
   [ -z "$1" ] && { echo -e "What manual page do you want?\nFor example, try 'man ls'." >&2; return 1; }
-  local cmd=$(command -v "$1")
-
-  # Check if command starts with 'alias' using grep and extract the aliased command
-  if echo "$cmd" | grep -q "^alias "; then
-    cmd=$(echo "$cmd" | grep -o "^alias .*$" | cut -d"'" -f2)
-    # Remove any arguments that the alias may contain
-    cmd=$(echo "$cmd" | cut -d '-' -f1)
-  fi
-
+  local cmd=$(_resolve "$1")
   # Check and display the help, providing a fallback message if the help cannot be displayed
-  $cmd --help >/dev/null 2>&1 && $cmd --help || { echo "No manual entry for $1" >&2; return 16; }
+  $cmd --help >/dev/null 2>&1 && $cmd --help 2>&1 | less || { echo "No manual entry for $1" >&2; return 16; }
 }
 
 # Define a sudo-like function
 sudo() {
-  if [ "$(id -u)" -eq 0 ]; then
-    $*
-  elif which su >/dev/null 2>&1; then
-    su -c "$*"
-  else
+  if [ "$#" -eq 0 ]; then
+    echo 'Usage: sudo <command>' >&2; return 1
+  elif [ "$(id -u)" -eq 0 ]; then
+    # Execute the command directly if already root
+    "$@"
+  elif [ -z $(_resolve 'su') ]; then
     echo 'su binary not found' >&2; return 127
+  else
+    # Recreate the full command string for proper shell execution
+    local full_cmd="$@"
+
+    # Construct the command to handle aliases and resolve the executable path
+    local bin=$(_resolve "$1")
+    if [ ! -z "$bin" ]; then
+      # Replace the original command with the resolved path
+      full_cmd=$(echo "$full_cmd" | sed "s:$1:$bin:g")
+    fi
+
+    # Use a subshell to ensure proper handling of special characters and redirections
+    su -c "sh -c '$full_cmd'"
   fi
 }
 
