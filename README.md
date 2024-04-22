@@ -7,7 +7,7 @@
 - **Environment Customization**: Sets HOSTNAME, USER, LOGNAME, and TMPDIR environment variables based on the device properties.
 - **Architecture Detection**: Automatically detects the device's CPU architecture to download appropriate binaries.
 - **BusyBox Integration**: Downloads and aliases BusyBox utilities, providing a wide range of standard Unix tools missing from standard Android shells.
-- **Frida Server Management**: Simplifies the installation and management of Frida, a dynamic instrumentation toolkit, for non-rooted environments without Magisk.
+- **Frida Server Management**: Simplifies the installation and management of Frida, a dynamic instrumentation toolkit, for rooted environments without Magisk.
 - **Enhanced Command Aliases**: Includes aliases for color support in command output and common command shortcuts to improve usability.
 - **Custom Commands**: Includes custom functions such as `tree`, `cfind`, `man`, and `sudo`, enhancing the functionality available in a typical Android shell.
 - **Dynamic Frida Control**: Allows starting, stopping, and checking the status of the Frida server directly from the shell.
