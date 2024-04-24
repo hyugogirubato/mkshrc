@@ -1,0 +1,52 @@
+#!/system/bin/sh
+# This script prints a directory tree starting from a given root directory, excluding hidden files.
+# Inspired by the tree utility script on GitHub: https://github.com/kddnewton/tree
+
+dir_count=0
+file_count=0
+
+# Function to traverse directories recursively
+traverse() {
+ dir_count=$(($dir_count + 1))
+ local directory=$1
+ local prefix=$2
+
+  # Loop through each item in the directory
+  for child in "$directory"/*; do
+    local child_prefix="│   "
+    local pointer="├── "
+
+    # Check if the current child is the last one in the directory
+    if [ "$child" = "$(ls -1d "$directory"/* 2>/dev/null | tail -n 1)" ]; then
+      pointer="└── "
+      child_prefix="    "
+    fi
+
+    # Display the current child with the tree structure
+    echo "${prefix}${pointer}${child##*/}"
+
+    # If child is a directory, recurse into it
+    [ -d "$child" ] &&
+      traverse "$child" "${prefix}$child_prefix" ||
+      file_count=$(($file_count + 1))
+  done
+}
+
+# Set the root directory from argument, default to current directory if not provided
+root="${1:-.}"
+status=0
+
+# Check if root directory is accessible
+if [ -d "$root" -a -r "$root" ]; then
+  echo $root
+  traverse $root ""
+  ((dir_count--))
+else
+  echo "$root  [error opening dir]"
+  status=2
+fi
+
+# Display the count of directories and files
+echo
+echo "$dir_count directories, $file_count files"
+return $status
