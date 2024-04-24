@@ -1,21 +1,18 @@
-#!/system/bin/sh
-
 # ==UserScript==
 # @name         mkshrc
 # @namespace    https://github.com/hyugogirubato/mkshrc
-# @version      1.10
+# @version      2.0
 # @description  Make an advanced shell environment for Android devices
 # @author       hyugogirubato
 # @match        Android
 # ==/UserScript==
 
+# set -x
 
 # Set environment variables based on device properties
 export HOSTNAME=$(getprop ro.boot.serialno)
 export USER=$(id -u -n)
 export LOGNAME=$USER
-export TMPDIR=${TMPDIR:-'/data/local/tmp'}
-
 
 # Find the architecture of the Android device using CPU ABI
 _arch() {
@@ -32,48 +29,71 @@ _arch() {
   esac
 }
 
+_unroot() {
+  if [ -e "$1" ]; then
+    chown shell:shell "$1"
+    chmod 755 "$1"
+  fi
+}
+
 
 # Initialize the architecture
 _arch
+
+# Init path
+mkshrc="$TMPDIR/mksh"
+mkdir -p "$mkshrc"
+_unroot "$mkshrc"
+
+if ! echo "$PATH" | grep -q "$mkshrc"; then
+  export PATH="$PATH:$mkshrc"
+fi
 
 # Define and verify the path to the BusyBox binary
 busybox='/sbin/.magisk/busybox/busybox'
 if [ ! -f "$busybox" ]; then
   busybox="$TMPDIR/busybox"
 
-  # Source: https://github.com/Magisk-Modules-Repo/busybox-ndk
-  url="https://raw.githubusercontent.com/Magisk-Modules-Repo/busybox-ndk/master/busybox-$ARCH"
-  [ -f '/sys/fs/selinux/enforce' ] && url+='-selinux'
-  curl -fs -o "$busybox" "$url" || { echo "Failed to download BusyBox from $url" >&2; return 1; }
-
-  # Ensure BusyBox binary is executable
-  chmod 755 "$busybox"
-  chown shell:shell "$busybox"
+  if [ ! -f "$busybox" ]; then
+    # Source: https://github.com/Magisk-Modules-Repo/busybox-ndk
+    url="https://raw.githubusercontent.com/Magisk-Modules-Repo/busybox-ndk/master/busybox-$ARCH"
+    [ -f '/sys/fs/selinux/enforce' ] && url+='-selinux'
+    curl -fsL -o "$busybox" "$url" || { echo "Failed to download BusyBox from $url" >&2; return 1; }
+  fi
+  _unroot "$busybox"
 fi
 
-# Create aliases for BusyBox commands
+# BusyBox
 for bin in $($busybox --list | grep -vE '^man$'); do
-  alias "$bin"="$busybox $bin" 2>/dev/null
+  link_path="$mkshrc/$bin"
+  if ! which "$bin" >/dev/null 2>&1; then
+    # Create a new symlink that correctly points to just the BusyBox binary
+    ln -s "$busybox" "$link_path"
+  fi
 done
 
-# Handle Frida installation if Magisk is not installed
-if [ ! -d '/sbin/.magisk/' ]; then
-  frida="$TMPDIR/frida-server"
+# Frida
+frida="$mkshrc/frida-server"
+if ! echo "$ARCH" | grep -q 'mips' && [ ! -f "$frida" ]; then
+  # Source: https://github.com/frida/frida
+  version='16.2.1'
+  url="https://github.com/frida/frida/releases/download/$version/frida-server-$version-android-$ARCH.xz"
+  curl -fsL -o "$frida.xz" "$url" || { echo "Failed to download Frida from $url" >&2; return 1; }
+  xz -d "$frida.xz"
+fi
 
-  if [ ! -f "$frida" ]; then
-    # Source: https://github.com/frida/frida
-    version='16.2.1'
-    url="https://github.com/frida/frida/releases/download/$version/frida-server-$version-android-$ARCH.xz"
-    curl -fsL -o "$frida.xz" "$url" || { echo "Failed to download Frida from $url" >&2; return 1; }
-    $busybox xz -d "$frida.xz"
-  fi
+[ -f "$frida" ] && _unroot "$frida"
 
-  # Ensure Frida binary is executable
-  chmod 755 "$frida"
-  chown shell:shell "$frida"
-  alias 'frida-server'="$frida"
-elif [ ! -d '/sbin/.magisk/modules/magisk-frida' ]; then
-  echo 'Install Frida using: https://github.com/ViRb3/magisk-frida'
+
+# tree
+if ! which 'tree' >/dev/null 2>&1; then
+  # Referer: https://stackoverflow.com/questions/18014779/similar-command-to-linux-tree-command-in-adb-shell
+  # Source: https://github.com/kddnewton/tree
+  # Issue: https://github.com/kddnewton/tree/pull/12/
+  path="$mkshrc/tree"
+  url='https://github.com/hyugogirubato/mkshrc/raw/main/tree'
+  curl -fsL -o "$path" "$url" || { echo "Failed to download tree from $url" >&2; return 1; }
+  _unroot "$path"
 fi
 
 # Enhance command output with color support if available
@@ -94,41 +114,27 @@ alias l='ls -CF'
 alias ipa='ip a'
 alias rm='rm -rf'
 
-# Display directory tree
-tree() {
-  # Source: https://stackoverflow.com/questions/18014779/similar-command-to-linux-tree-command-in-adb-shell
-  local parent="${1:-.}"
-
-  local files=0
-  local dirs=0
-  local status=0
-  if [ -d "$parent" -a -r "$parent" ]; then
-    # Create a temporary file
-    rm -rf $TMPDIR/tmp.* 2>/dev/null
-    local tempfile=$(mktemp)
-
-    # Store sorted find results in a temporary file
-    find "$parent" 2>/dev/null | sort > "$tempfile"
-
-    # Read from the temporary file
-    while IFS= read -r path; do
-      if [ "$(realpath "$path" )" != "$tempfile" ]; then
-        [ -f "$path" ] && ((files++))
-        [ -d "$path" ] && ((dirs++))
-        echo "$path" | sed 's;[^/]*/;├── ;g;s;── ├;   │;g;s;├   ;│   ;g;s;│──;├──;g'
-      fi
-    done < "$tempfile"
-
-    # Remove the temporary file
-    rm "$tempfile"
-    ((dirs--))
+# Define a sudo-like function
+sudo() {
+  if [ "$#" -eq 0 ]; then
+    echo 'Usage: sudo <command>' >&2; return 1
+  elif [ "$(id -u)" -eq 0 ]; then
+    # Execute the command directly if already root
+    "$@"
+  elif [ ! which 'su' >/dev/null 2>&1 ]; then
+    echo 'su binary not found' >&2; return 127
   else
-    echo "$parent  [error opening dir]"
-    status=2
-  fi
+    local cmd="$@"
+    local alias=$(command -v "$1")
 
-  echo -e "\n$dirs directories, $files files"
-  return $status
+    if echo "$alias" | grep -q "^alias "; then
+      alias=$(echo "$alias" | grep -o "^alias .*$" | cut -d "'" -f2)
+      cmd=$(echo "$cmd" | sed "s:$1:$alias:g")
+    fi
+
+    # Use a subshell to ensure proper handling of special characters and redirections
+    su -c "$cmd"
+  fi
 }
 
 # Custom find command that displays colored results
@@ -140,80 +146,37 @@ cfind() {
   fi
 }
 
-_resolve() {
-  local bin=$(command -v "$1")
-
-  # Check if command starts with 'alias' using grep and extract the aliased command
-  if echo "$bin" | grep -q "^alias "; then
-    bin=$(echo "$bin" | grep -o "^alias .*$" | cut -d "'" -f2)
-    # Remove any arguments that the alias may contain
-    bin=$(echo "$bin" | cut -d '-' -f1)
-  fi
-  echo "$bin"
-}
-
 # Simulate 'man' command
 man() {
   [ -z "$1" ] && { echo -e "What manual page do you want?\nFor example, try 'man ls'." >&2; return 1; }
-  local cmd=$(_resolve "$1")
-  # Check and display the help, providing a fallback message if the help cannot be displayed
-  $cmd --help >/dev/null 2>&1 && $cmd --help 2>&1 | less || { echo "No manual entry for $1" >&2; return 16; }
+  "$1" --help >/dev/null 2>&1 && "$1" --help 2>&1 || { echo "No manual entry for $1" >&2; return 16; }
 }
 
-# Define a sudo-like function
-sudo() {
-  if [ "$#" -eq 0 ]; then
-    echo 'Usage: sudo <command>' >&2; return 1
-  elif [ "$(id -u)" -eq 0 ]; then
-    # Execute the command directly if already root
-    "$@"
-  elif [ -z $(_resolve 'su') ]; then
-    echo 'su binary not found' >&2; return 127
-  else
-    # Recreate the full command string for proper shell execution
-    local full_cmd="$@"
-
-    # Construct the command to handle aliases and resolve the executable path
-    local bin=$(_resolve "$1")
-    if [ ! -z "$bin" ]; then
-      # Replace the original command with the resolved path
-      full_cmd=$(echo "$full_cmd" | sed "s:$1:$bin:g")
-    fi
-
-    # Use a subshell to ensure proper handling of special characters and redirections
-    su -c "sh -c '$full_cmd'"
-  fi
-}
-
-# Stop frida-server if it's running without Magisk
-frida-stop() {
-  if [ -d '/sbin/.magisk/' ]; then
-    echo 'Use Magisk to stop Frida' >&2; return 1
-  else
-    local pid=$(pgrep -f frida-server)
-    if [ ! -z "$pid" ]; then
-      sudo kill -9 $pid || { echo 'Failed to stop Frida' >&2; return 1; }
-    fi
-  fi
-}
-
-# Check the status of the frida-server
 frida-status() {
   local pid=$(pgrep -f frida-server)
   [ -z "$pid" ] && echo 'Frida not running' ||  echo "Frida PID: $pid"
 }
 
-# Start frida-server if it's not already running and Magisk is not installed
 frida-start() {
   local pid=$(pgrep -f frida-server)
   if [ -z "$pid" ]; then
-    if [ -d '/sbin/.magisk/' ]; then
-      echo 'Use Magisk to start Frida' >&2; return 1
-    else
-      sudo setenforce 0 >/dev/null 2>&1
-      sudo frida-server -D "$@" || { echo 'Failed to start Frida' >&2; return 1; }
-    fi
+    # Set SELinux to permissive mode silently
+    sudo setenforce 0 >/dev/null 2>&1
+    sudo frida-server -D "$@" || { echo 'Failed to start Frida' >&2; return 1; }
   else
     echo 'Frida already running'
+  fi
+}
+
+frida-stop() {
+  local pid=$(pgrep -f frida-server)
+  if [ ! -z "$pid" ]; then
+    sudo kill -9 $pid || { echo 'Failed to stop Frida' >&2; return 1; }
+
+    # Check again if Frida server is still running
+    if pgrep -f frida-server &>/dev/null; then
+      [ -d '/sbin/.magisk/' ] && echo 'Use Magisk to stop Frida' >&2 || echo 'Frida still running' >&2
+      return 1
+    fi
   fi
 }
