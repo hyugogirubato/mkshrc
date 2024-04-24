@@ -104,7 +104,7 @@ if ls --color=auto >/dev/null 2>&1; then
   alias egrep='egrep --color=auto'
   alias logcat='logcat -v color'
   alias ip='ip -c'
-  alias diff='diff --color=auto'
+  alias diff='diff --color'
 fi
 
 # Define commonly used aliases
