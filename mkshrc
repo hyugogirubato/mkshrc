@@ -7,95 +7,12 @@
 # @match        Android
 # ==/UserScript==
 
-# set -x
 
 # Set environment variables based on device properties
 export HOSTNAME=$(getprop ro.boot.serialno)
 export USER=$(id -u -n)
 export LOGNAME=$USER
 export TMPDIR='/data/local/tmp'
-
-# Find the architecture of the Android device using CPU ABI
-_arch() {
-  # Source: https://github.com/Magisk-Modules-Repo/busybox-ndk/blob/master/customize.sh#L314C1-L334C2
-  local abi=$(getprop ro.product.cpu.abi)
-  case $abi in
-    arm64*) ARCH='arm64' ;;
-    arm*) ARCH='arm' ;;
-    x86_64*) ARCH='x86_64' ;;
-    x86*) ARCH='x86' ;;
-    mips64*) ARCH='mips64' ;;
-    mips*) ARCH='mips' ;;
-    *) echo "Unknown architecture: $abi" >&2; return 1 ;;
-  esac
-}
-
-_unroot() {
-  if [ -e "$1" ]; then
-    chown shell:shell "$1"
-    chmod 755 "$1"
-  fi
-}
-
-
-# Initialize the architecture
-_arch
-
-# Init path
-mkshrc="$TMPDIR/mksh"
-mkdir -p "$mkshrc"
-_unroot "$mkshrc"
-
-if ! echo "$PATH" | grep -q "$mkshrc"; then
-  export PATH="$PATH:$mkshrc"
-fi
-
-# Define and verify the path to the BusyBox binary
-busybox='/sbin/.magisk/busybox/busybox'
-if [ ! -f "$busybox" ]; then
-  busybox="$TMPDIR/busybox"
-
-  if [ ! -f "$busybox" ]; then
-    # Source: https://github.com/Magisk-Modules-Repo/busybox-ndk
-    url="https://raw.githubusercontent.com/Magisk-Modules-Repo/busybox-ndk/master/busybox-$ARCH"
-    [ -f '/sys/fs/selinux/enforce' ] && url+='-selinux'
-    curl -fsL -o "$busybox" "$url" || { echo "Failed to download BusyBox from $url" >&2; return 1; }
-  fi
-  _unroot "$busybox"
-fi
-
-# BusyBox
-for bin in $($busybox --list | grep -vE '^man$'); do
-  link_path="$mkshrc/$bin"
-  if ! which "$bin" >/dev/null 2>&1; then
-    # Create a new symlink that correctly points to just the BusyBox binary
-    ln -s "$busybox" "$link_path"
-  fi
-done
-
-# Frida
-frida="$mkshrc/frida-server"
-if ! echo "$ARCH" | grep -q 'mips' && [ ! -f "$frida" ]; then
-  # Source: https://github.com/frida/frida
-  version='16.2.1'
-  url="https://github.com/frida/frida/releases/download/$version/frida-server-$version-android-$ARCH.xz"
-  curl -fsL -o "$frida.xz" "$url" || { echo "Failed to download Frida from $url" >&2; return 1; }
-  xz -d "$frida.xz"
-fi
-
-[ -f "$frida" ] && _unroot "$frida"
-
-
-# tree
-if ! which 'tree' >/dev/null 2>&1; then
-  # Referer: https://stackoverflow.com/questions/18014779/similar-command-to-linux-tree-command-in-adb-shell
-  # Source: https://github.com/kddnewton/tree
-  # Issue: https://github.com/kddnewton/tree/pull/12/
-  path="$mkshrc/tree"
-  url='https://github.com/hyugogirubato/mkshrc/raw/main/tree'
-  curl -fsL -o "$path" "$url" || { echo "Failed to download tree from $url" >&2; return 1; }
-  _unroot "$path"
-fi
 
 # Enhance command output with color support if available
 if ls --color=auto >/dev/null 2>&1; then
@@ -114,6 +31,97 @@ alias la='ls -A'
 alias l='ls -CF'
 alias ipa='ip a'
 alias rm='rm -rf'
+
+
+# Part 1: Tools & utilities
+_unroot() {
+  if [ -e "$1" ]; then
+    chown shell:shell "$1"
+    chmod 755 "$1"
+  fi
+}
+
+binaries="$TMPDIR/bin"
+mkdir -p "$binaries"
+_unroot "$binaries"
+
+if ! echo "$PATH" | grep -q "$binaries"; then
+  export PATH="$PATH:$binaries"
+fi
+
+# @tree (Simulate 'tree' command)
+if ! which 'tree' >/dev/null 2>&1; then
+  # Referer: https://stackoverflow.com/questions/18014779/similar-command-to-linux-tree-command-in-adb-shell
+  # Source: https://github.com/kddnewton/tree
+  # Issue: https://github.com/kddnewton/tree/pull/12/
+  path="$binaries/tree"
+  url='https://github.com/hyugogirubato/mkshrc/raw/main/tree'
+  curl -fsL -o "$path" "$url" || { echo "Failed to download tree from $url" >&2; return 1; }
+  _unroot "$path"
+fi
+
+# @man (Simulate 'man' command)
+man() {
+  [ -z "$1" ] && { echo -e "What manual page do you want?\nFor example, try 'man ls'." >&2; return 1; }
+  "$1" --help >/dev/null 2>&1 && "$1" --help 2>&1 || { echo "No manual entry for $1" >&2; return 16; }
+}
+
+# @cfind (Custom find command that displays colored results)
+cfind() {
+  if ls --color=auto $TMPDIR >/dev/null 2>&1; then
+    find "${1:-.}" -print0 | xargs -0 ls -d1 --color=auto
+  else
+    echo 'Unsupported XTerm environment' >&2; return 1
+  fi
+}
+
+
+# Part 2: Busybox
+# Find the architecture of the Android device using CPU ABI
+_arch() {
+  # Source: https://github.com/Magisk-Modules-Repo/busybox-ndk/blob/master/customize.sh#L314C1-L334C2
+  local abi=$(getprop ro.product.cpu.abi)
+  case $abi in
+    arm64*) ARCH='arm64' ;;
+    arm*) ARCH='arm' ;;
+    x86_64*) ARCH='x86_64' ;;
+    x86*) ARCH='x86' ;;
+    mips64*) ARCH='mips64' ;;
+    mips*) ARCH='mips' ;;
+    *) echo "Unknown architecture: $abi" >&2; return 1 ;;
+  esac
+}
+
+# Initialize the architecture
+_arch
+
+# Define and verify the path to the BusyBox binary
+busybox='/sbin/.magisk/busybox/busybox'
+if [ ! -f "$busybox" ]; then
+  busybox="$binaries/busybox"
+
+  if [ ! -f "$busybox" ]; then
+    # Source: https://github.com/Magisk-Modules-Repo/busybox-ndk
+    url="https://raw.githubusercontent.com/Magisk-Modules-Repo/busybox-ndk/master/busybox-$ARCH"
+    [ -f '/sys/fs/selinux/enforce' ] && url+='-selinux'
+    curl -fsL -o "$busybox" "$url" || { echo "Failed to download BusyBox from $url" >&2; return 1; }
+  fi
+  _unroot "$busybox"
+fi
+
+# BusyBox
+for bin in $($busybox --list | grep -vE '^man$'); do
+  link_path="$binaries/$bin"
+  if ! which "$bin" >/dev/null 2>&1; then
+    # Create a new symlink that correctly points to just the BusyBox binary
+    ln -s "$busybox" "$link_path"
+  fi
+done
+
+
+# Part 3: Frida
+# Install Frida / sudo only if current shell is root shell or su binary exist
+[ ! which 'su' >/dev/null 2>&1 -a ! $(id -u) -eq 0] && return;
 
 # Define a sudo-like function
 sudo() {
@@ -138,20 +146,17 @@ sudo() {
   fi
 }
 
-# Custom find command that displays colored results
-cfind() {
-  if ls --color=auto $TMPDIR >/dev/null 2>&1; then
-    find "${1:-.}" -print0 | xargs -0 ls -d1 --color=auto
-  else
-    echo 'Unsupported XTerm environment' >&2; return 1
-  fi
-}
+# Frida
+frida="$binaries/frida-server"
+if ! echo "$ARCH" | grep -q 'mips' && [ ! -f "$frida" ]; then
+  # Source: https://github.com/frida/frida
+  version='16.2.1'
+  url="https://github.com/frida/frida/releases/download/$version/frida-server-$version-android-$ARCH.xz"
+  curl -fsL -o "$frida.xz" "$url" || { echo "Failed to download Frida from $url" >&2; return 1; }
+  xz -d "$frida.xz"
+fi
 
-# Simulate 'man' command
-man() {
-  [ -z "$1" ] && { echo -e "What manual page do you want?\nFor example, try 'man ls'." >&2; return 1; }
-  "$1" --help >/dev/null 2>&1 && "$1" --help 2>&1 || { echo "No manual entry for $1" >&2; return 16; }
-}
+[ -f "$frida" ] && _unroot "$frida"
 
 frida-status() {
   local pid=$(pgrep -f frida-server)
@@ -173,6 +178,7 @@ frida-stop() {
   local pid=$(pgrep -f frida-server)
   if [ ! -z "$pid" ]; then
     sudo kill -9 $pid || { echo 'Failed to stop Frida' >&2; return 1; }
+    sudo setenforce 1 >/dev/null 2>&1
 
     # Check again if Frida server is still running
     if pgrep -f frida-server &>/dev/null; then
