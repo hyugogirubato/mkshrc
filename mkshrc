@@ -13,6 +13,7 @@
 export HOSTNAME=$(getprop ro.boot.serialno)
 export USER=$(id -u -n)
 export LOGNAME=$USER
+export TMPDIR='/data/local/tmp'
 
 # Find the architecture of the Android device using CPU ABI
 _arch() {
@@ -103,8 +104,8 @@ if ls --color=auto >/dev/null 2>&1; then
   alias fgrep='fgrep --color=auto'
   alias egrep='egrep --color=auto'
   alias logcat='logcat -v color'
-  alias ip='ip -c'
-  alias diff='diff --color'
+  alias ip='ip --color=auto'
+  alias diff='diff --color=auto'
 fi
 
 # Define commonly used aliases
