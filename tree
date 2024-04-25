@@ -47,7 +47,7 @@ root="${1:-.}"
 if [ -d "$root" -a -r "$root" ]; then
   echo "$root"
   traverse "$root" ""
-  # ((dir_count--))
+  ((dir_count--))
 else
   echo "$root  [error opening dir]"
   status=2
