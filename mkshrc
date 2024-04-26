@@ -1,28 +1,36 @@
+#!/system/bin/sh
+
 # ==UserScript==
 # @name         mkshrc
-# @namespace    https://github.com/hyugogirubato/mkshrc
-# @version      2.3
+# @namespace    https://github.com/hyugogirubato/mkshrc/blob/main/mkshrc
+# @version      2.4
 # @description  Make an advanced shell environment for Android devices
 # @author       hyugogirubato
 # @match        Android
+# @source       https://github.com/Zackptg5/Cross-Compiled-Binaries-Android
 # ==/UserScript==
 
 
 # Set environment variables based on device properties
+# HOSTNAME is set to the device's serial number
 export HOSTNAME=$(getprop ro.boot.serialno)
+# USER and LOGNAME are set to the current user's name
 export USER=$(id -u -n)
 export LOGNAME=$USER
+# TMPDIR is set to a common temporary directory
 export TMPDIR='/data/local/tmp'
 
+
 # Enhance command output with color support if available
+# This block checks if color support is available and sets aliases accordingly
 if ls --color=auto >/dev/null 2>&1; then
   alias ls='ls --color=auto'
   alias grep='grep --color=auto'
   alias fgrep='fgrep --color=auto'
   alias egrep='egrep --color=auto'
   alias logcat='logcat -v color'
-  alias ip='ip --color=auto'
-  alias diff='diff --color=auto'
+  alias ip='ip -c'
+  alias diff='diff --color'
 fi
 
 # Define commonly used aliases
@@ -34,6 +42,7 @@ alias rm='rm -rf'
 
 
 # Part 1: Tools & utilities
+# Function to unroot files by changing ownership and permissions
 _unroot() {
   if [ -e "$1" ]; then
     chown shell:shell "$1"
@@ -41,15 +50,17 @@ _unroot() {
   fi
 }
 
+# Create a directory for binaries if it doesn't exist
 binaries="$TMPDIR/bin"
 mkdir -p "$binaries"
 _unroot "$binaries"
 
+# Add binaries directory to PATH if it's not already there
 if ! echo "$PATH" | grep -q "$binaries"; then
   export PATH="$PATH:$binaries"
 fi
 
-# @tree (Simulate 'tree' command)
+# Function to simulate 'tree' command
 if ! which 'tree' >/dev/null 2>&1; then
   # Referer: https://stackoverflow.com/questions/18014779/similar-command-to-linux-tree-command-in-adb-shell
   # Source: https://github.com/kddnewton/tree
@@ -60,16 +71,16 @@ if ! which 'tree' >/dev/null 2>&1; then
   _unroot "$path"
 fi
 
-# @man (Simulate 'man' command)
+# Function to simulate 'man' command
 man() {
   [ -z "$1" ] && { echo -e "What manual page do you want?\nFor example, try 'man ls'." >&2; return 1; }
   "$1" --help >/dev/null 2>&1 && "$1" --help 2>&1 || { echo "No manual entry for $1" >&2; return 16; }
 }
 
-# @cfind (Custom find command that displays colored results)
+# Custom find command that displays colored results
 cfind() {
   if ls --color=auto $TMPDIR >/dev/null 2>&1; then
-    find "${1:-.}" -print0 | xargs -0 ls -d1 --color=auto
+    find "${1:-.}" -print0 | xargs -0 ls --color=auto -d1
   else
     echo 'Unsupported XTerm environment' >&2; return 1
   fi
@@ -77,7 +88,7 @@ cfind() {
 
 
 # Part 2: Busybox
-# Find the architecture of the Android device using CPU ABI
+# Function to determine the device's architecture
 _arch() {
   # Source: https://github.com/Magisk-Modules-Repo/busybox-ndk/blob/master/customize.sh#L314C1-L334C2
   local abi=$(getprop ro.product.cpu.abi)
@@ -92,10 +103,8 @@ _arch() {
   esac
 }
 
-# Initialize the architecture
+# Check if Busybox is available, download if not
 _arch
-
-# Define and verify the path to the BusyBox binary
 busybox='/sbin/.magisk/busybox/busybox'
 if [ ! -f "$busybox" ]; then
   busybox="$binaries/busybox"
@@ -109,7 +118,7 @@ if [ ! -f "$busybox" ]; then
   _unroot "$busybox"
 fi
 
-# BusyBox
+# Create symbolic links for Busybox binaries
 for bin in $($busybox --list | grep -vE '^man$'); do
   link_path="$binaries/$bin"
   if ! which "$bin" >/dev/null 2>&1; then
@@ -146,7 +155,7 @@ sudo() {
   fi
 }
 
-# Frida
+# Install Frida server
 frida="$binaries/frida-server"
 if ! echo "$ARCH" | grep -q 'mips' && [ ! -f "$frida" ]; then
   # Source: https://github.com/frida/frida
@@ -158,11 +167,13 @@ fi
 
 [ -f "$frida" ] && _unroot "$frida"
 
+# Function to check Frida server status
 frida-status() {
   local pid=$(pgrep -f frida-server)
   [ -z "$pid" ] && echo 'Frida not running' ||  echo "Frida PID: $pid"
 }
 
+# Function to start Frida server
 frida-start() {
   local pid=$(pgrep -f frida-server)
   if [ -z "$pid" ]; then
@@ -174,6 +185,7 @@ frida-start() {
   fi
 }
 
+# Function to stop Frida server
 frida-stop() {
   local pid=$(pgrep -f frida-server)
   if [ ! -z "$pid" ]; then
