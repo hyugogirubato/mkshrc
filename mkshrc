@@ -3,7 +3,7 @@
 # ==UserScript==
 # @name         mkshrc
 # @namespace    https://github.com/hyugogirubato/mkshrc/blob/main/mkshrc
-# @version      2.4
+# @version      2.5
 # @description  Make an advanced shell environment for Android devices
 # @author       hyugogirubato
 # @match        Android
@@ -61,15 +61,15 @@ if ! echo "$PATH" | grep -q "$binaries"; then
 fi
 
 # Function to simulate 'tree' command
-if ! which 'tree' >/dev/null 2>&1; then
+tree="$binaries/tree"
+if [ ! -f "$tree" ]; then
   # Referer: https://stackoverflow.com/questions/18014779/similar-command-to-linux-tree-command-in-adb-shell
   # Source: https://github.com/kddnewton/tree
   # Issue: https://github.com/kddnewton/tree/pull/12/
-  path="$binaries/tree"
-  url='https://github.com/hyugogirubato/mkshrc/raw/main/tree'
-  curl -fsL -o "$path" "$url" || { echo "Failed to download tree from $url" >&2; return 1; }
-  _unroot "$path"
+  url='https://github.com/user/mkshrc/raw/main/tree'
+  curl -fsL -o "$tree" "$url" || { echo "Failed to download tree from $url" >&2; return 1; }
 fi
+_unroot "$tree"
 
 # Function to simulate 'man' command
 man() {
