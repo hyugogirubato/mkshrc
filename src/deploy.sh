@@ -63,7 +63,7 @@ adb -s "$serial" shell mkdir -p "$TMPDIR/bin"
 # Push binaries and scripts to the device
 adb -s "$serial" push 'mkshrc' "$TMPDIR/mkshrc"
 adb -s "$serial" push "$busybox" "$TMPDIR/bin/busybox"
-adb -s "$serial" push "$frida" "$TMPDIR/frida-server"
+adb -s "$serial" push "$frida" "$TMPDIR/bin/frida-server"
 
 echo 'Deployment completed successfully.'
 
