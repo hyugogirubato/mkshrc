@@ -75,22 +75,25 @@ busybox="$PARENT/busybox"
 
 # Ensure a .gitkeep file exists in the custom bin directory
 keep="$PARENT/.gitkeep"
-if [ ! -f "$keep" -a -f "$busybox" ]; then
+if [ -f "$busybox" ]; then
   _exec "$busybox"
-  # Create symbolic links for all busybox utilities
-  for bin in $($busybox --list | grep -vE '^man$'); do
-    if ! _exist "$bin"; then
-      ln -s "$busybox" "$PARENT/$bin"
-    fi
-  done
+
+  if [ ! -f "$keep" ]; then
+    # Create symbolic links for all busybox utilities
+    for bin in $($busybox --list | grep -vE '^man$'); do
+      if ! _exist "$bin"; then
+        ln -s "$busybox" "$PARENT/$bin"
+      fi
+    done
+
+    # Touch the .gitkeep file to ensure the directory is not empty
+    touch "$keep"
+    _exec "$keep"
+  fi
 fi
 
-# Touch the .gitkeep file to ensure the directory is not empty
-touch "$keep"
-_exec "$keep"
-
 # Create a custom colored find command if both find and color support are available
-_exist 'find' && [ "$color_prompt" = yes ] && {
+_exist find && [ "$color_prompt" = yes ] && {
   local binary="$PARENT/cfind"
   echo "find \$@ | sed 's/\\n/ /g' | xargs ls --color=auto -d1" > "$binary"
   _exec "$binary"
@@ -107,7 +110,7 @@ function man() {
 export man
 
 # Add sudo command support if running as root or if `su` is available
-if [ $(id -u) -eq 0 ] || _exist 'su'; then
+if [ $(id -u) -eq 0 ] || _exist su; then
 
   function sudo() {
     [ $# -eq 0 ] && { echo 'Usage: sudo <command>' >&2 ; return 1; }
@@ -117,7 +120,7 @@ if [ $(id -u) -eq 0 ] || _exist 'su'; then
     if [ $(id -u) -eq 0 ]; then
       $prompt
     else
-      _exist 'su' || { echo 'su binary not found' >&2; return 127; }
+      _exist su || { echo 'su binary not found' >&2; return 127; }
       su -c "$prompt"
     fi
   }
