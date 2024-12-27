@@ -29,9 +29,9 @@ function _resolve() {
   local binary="$1"
   local alias=$(command -v "$binary" 2>/dev/null)
   if echo "$alias" | grep -q '^alias '; then
-    binary=$(echo "$alias" | grep -o '^alias .*$' | cut -d "'" -f2) # Extract alias target
+    binary=$(echo "$alias" | grep -o '^alias .*$' | cut -d '=' -f2-) # Extract alias target
   fi
-  echo "$binary"
+  echo "$binary" | sed "s/^'\(.*\)'$/\1/"
 }
 
 # Environment variable setup
