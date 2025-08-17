@@ -3,3 +3,9 @@
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
+
+# Ignore large frida binaries
+/package/arm64-v8a/frida/
+/package/armeabi-v7a/frida/
+/package/x86/frida/
+/package/x86_64/frida/
