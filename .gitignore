@@ -5,7 +5,4 @@
 .idea/
 
 # Ignore large frida binaries
-/package/arm64-v8a/frida/
-/package/armeabi-v7a/frida/
-/package/x86/frida/
-/package/x86_64/frida/
+/package/**/frida/frida-server*
