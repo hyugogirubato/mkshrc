@@ -274,7 +274,7 @@ rc_bin="$rc_root/bin"
 echo "$PATH" | grep -q "$rc_bin" || export PATH="$PATH:$rc_bin"
 
 # Provide supolicy fallback (used in Magisk contexts)
-[ -f "$rc_bin/libsupol.so" ] || alias supolicy="LD_LIBRARY_PATH='$rc_bin' $rc_bin/supolicy"
+[ -f "$rc_bin/libsupol.so" ] && alias supolicy="LD_LIBRARY_PATH='$rc_bin' $rc_bin/supolicy"
 
 ###############################################################################
 # Prompt & Colors
