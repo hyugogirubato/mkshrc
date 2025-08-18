@@ -271,13 +271,13 @@ if [ "$rc_root" != "$rc_tmpfs" ]; then
     sudo chcon -R u:object_r:shell_data_file:s0 "$rc_tmpfs/mkshrc" "$rc_tmpfs/bin"
 
     rc_root="$rc_tmpfs"
-    #echo '[I] Script mount permanently until next reboot'
+    echo '[I] Script mount permanently until next reboot'
   #else
   #  echo '[D] RC already defined persistently'
   fi
-#else
-#  echo '[E] RC in persistent mode unavailable'
-#  echo '[W] Script sets for current shell context only'
+else
+  echo '[E] RC in persistent mode unavailable'
+  echo '[W] Script sets for current shell context only'
 fi
 
 rc_bin="$rc_root/bin"
