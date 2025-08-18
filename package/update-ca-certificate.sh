@@ -22,6 +22,12 @@ crt_path="${1?'Missing certificate path'}"
   exit 1
 }
 
+# Verify that the current user has root privileges
+[ "$(sudo id -un 2>&1)" = 'root' ] || {
+  echo 'Permission denied. Privileged user not available.'
+  exit 1
+}
+
 # Normalize line endings (some certs copied from Windows may break openssl)
 dos2unix "$crt_path"
 
