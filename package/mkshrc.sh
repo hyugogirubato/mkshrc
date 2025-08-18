@@ -81,6 +81,11 @@ _exist nc || alias nc='netcat'
 # Use ps -A if it shows more processes than default ps
 [ "$(ps -A | wc -l)" -gt 1 ] && alias ps='ps -A'
 
+# Create a custom colored find command if both find and color support are available
+_exist find && [ "$color_prompt" = yes ] && {
+  alias cfind="find \"$*\" | sed 's/\\n/ /g' | xargs $(_resolve ls) -d"
+}
+
 # Fix mksh vi mode issues when editing multi-line
 _vi() {
   # https://github.com/matan-h/adb-shell/blob/main/startup.sh#L52
