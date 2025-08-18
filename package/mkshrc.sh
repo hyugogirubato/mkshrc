@@ -147,6 +147,18 @@ export sudo
 
 # Frida server management
 frida() {
+  # Ensure the frida-server binary is available
+  _exist frida-server || {
+    echo 'frida-server binary not found in PATH' >&2
+    return 1
+  }
+
+  # Verify that the current user has root privileges
+  [ "$(sudo id -un 2>&1)" = 'root' ] || {
+    echo 'Permission denied. Privileged user not available.'
+    exit 1
+  }
+
   case "$1" in
   start)
     # Start Frida server if not already running
