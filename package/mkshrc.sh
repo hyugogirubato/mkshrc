@@ -227,8 +227,8 @@ _detect() {
 rc_root="$DEFAULT_RC"            # fallback to temp dir
 rc_tmpfs="$(_detect "$rc_root")" # check for root locations
 
-#echo "[I] RC root path: $rc_root"
-#echo "[I] RC tmpfs path: $rc_tmpfs"
+#echo "[D] RC root path: $rc_root"
+#echo "[D] RC tmpfs path: $rc_tmpfs"
 
 # If persistent mode possible, mount tmpfs over target path
 if [ "$rc_root" != "$rc_tmpfs" ]; then
@@ -273,7 +273,7 @@ if [ "$rc_root" != "$rc_tmpfs" ]; then
     rc_root="$rc_tmpfs"
     #echo '[I] Script mount permanently until next reboot'
   #else
-  #  echo '[I] RC already defined persistently'
+  #  echo '[D] RC already defined persistently'
   fi
 #else
 #  echo '[E] RC in persistent mode unavailable'
