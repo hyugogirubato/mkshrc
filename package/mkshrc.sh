@@ -166,7 +166,7 @@ frida() {
       echo 'Frida is already running.' >&2
       return 1
     }
-    sudo setenforce 0 >/dev/null 2>&1 # disable SELinux temporarily
+    #sudo setenforce 0 >/dev/null 2>&1 # disable SELinux temporarily
     sudo frida-server -D || {
       echo 'Failed to start Frida.' >&2
       return 1
