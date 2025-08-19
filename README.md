@@ -59,7 +59,9 @@ source /data/local/tmp/mkshrc
 
 ## Extra Utilities
 
-* `update-ca-certificate` – install custom CA certificates into the Android system trust store.
+* `update-ca-certificate <path>` – install custom CA certificates into the Android system trust store.
+* `restart` – perform a **soft reboot** of the Android framework (requires root).
+* `pull <path>` – safely copy a file from the system into `/data/local/tmp/`.
 * BusyBox applets are symlinked automatically (except `man`).
 
 ## Disclaimer
