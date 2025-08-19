@@ -5,4 +5,4 @@
 .idea/
 
 # Ignore large frida binaries
-/package/**/frida/frida-server*
+#/package/**/frida/frida-server*
