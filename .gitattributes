@@ -1,9 +1,10 @@
 # Track all files in packages/ with LFS by default
-packages/**/* filter=lfs diff=lfs merge=lfs -text
+package/**/* filter=lfs diff=lfs merge=lfs -text
 
 # Exclude shell scripts and text files from LFS
-packages/**/*.sh -filter -diff -merge text
-packages/**/*.txt -filter -diff -merge text
+package/**/*.sh -filter -diff -merge text
+package/**/*.txt -filter -diff -merge text
 
 # Exclude frida-server binaries from LFS
-packages/**/frida/frida-server* -filter -diff -merge text
+#package/**/frida/frida-server* -filter -diff -merge text
+
