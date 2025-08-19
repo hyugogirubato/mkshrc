@@ -212,14 +212,8 @@ DEFAULT_RC="$TMPDIR"
 # Detect where to install mkshrc based on privilege
 function _detect() {
   if [ "$(sudo id -un 2>&1)" = 'root' ]; then
-    [ -f "$SYSTEM_RC/mkshrc" ] && {
-      echo "$SYSTEM_RC"
-      return
-    }
-    [ -f "$VENDOR_RC/mkshrc" ] && {
-      echo "$VENDOR_RC"
-      return
-    }
+    [ -f "$SYSTEM_RC/mkshrc" ] && echo "$SYSTEM_RC" && return
+    [ -f "$VENDOR_RC/mkshrc" ] && echo "$VENDOR_RC" && return
   fi
   echo "$1"
 }
