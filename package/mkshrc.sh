@@ -14,15 +14,15 @@
 ###############################################################################
 
 # Check if a command exists in PATH
-_exist() {
+function _exist() {
   command -v "$1" >/dev/null 2>&1
 }
 
 # Resolve the actual binary path, handling aliases
 # Example: if "ls" is an alias, this returns the real command target
-_resolve() {
-  binary="$1"
-  resolved="$(command -v "$binary" 2>/dev/null)"
+function _resolve() {
+  local binary="$1"
+  local resolved="$(command -v "$binary" 2>/dev/null)"
 
   # If the result is an alias, extract the target
   if echo "$resolved" | grep -q '^alias '; then
@@ -87,7 +87,7 @@ _exist find && [ "$color_prompt" = yes ] && {
 }
 
 # Fix mksh vi mode issues when editing multi-line
-_vi() {
+function _vi() {
   # https://github.com/matan-h/adb-shell/blob/main/startup.sh#L52
   set +o emacs +o vi-tabcomplete
   vi "$@"
@@ -96,17 +96,17 @@ _vi() {
 alias vi=_vi
 
 # Basic replacement for "man" since Android usually lacks it
-man() {
-  binary="$(_resolve "$1" | cut -d ' ' -f1)"
+function man() {
+  local binary="$(_resolve "$1" | cut -d ' ' -f1)"
 
   # Handle empty or recursive call (man man)
   if [ -z "$binary" ] || [ "$binary" = 'man' ]; then
-    echo "What manual page do you want?\nFor example, try 'man ls'." >&2
+    echo -e "What manual page do you want?\nFor example, try 'man ls'." >&2
     return 1
   fi
 
   # Use --help output as a poor-man’s manual
-  manual="$("$binary" --help 2>&1)"
+  local manual="$("$binary" --help 2>&1)"
   if [ $? -eq 127 ] || [ -z "$manual" ]; then
     echo "No manual entry for $binary" >&2
     return 16
@@ -117,14 +117,14 @@ man() {
 export man
 
 # Sudo wrapper (works with root / su / Magisk)
-sudo() {
+function sudo() {
   [ $# -eq 0 ] && {
     echo 'Usage: sudo <command>' >&2
     return 1
   }
 
-  binary="$(_resolve "$1")"
-  prompt="$(echo "$@" | sed "s:$1:$binary:g")"
+  local binary="$(_resolve "$1")"
+  local prompt="$(echo "$@" | sed "s:$1:$binary:g")"
 
   if [ "$(id -u)" -eq 0 ]; then
     # Already root
@@ -146,7 +146,7 @@ sudo() {
 export sudo
 
 # Frida server management
-frida() {
+function frida() {
   # Ensure the frida-server binary is available
   _exist frida-server || {
     echo 'frida-server binary not found in PATH' >&2
@@ -174,7 +174,7 @@ frida() {
     ;;
   status)
     # Check if Frida server is running
-    pid="$(pgrep -f frida-server)"
+    local pid="$(pgrep -f frida-server)"
     [ -z "$pid" ] && {
       echo 'Frida is not running.' >&2
       return 1
@@ -210,7 +210,7 @@ VENDOR_RC='/vendor/etc'
 DEFAULT_RC="$TMPDIR"
 
 # Detect where to install mkshrc based on privilege
-_detect() {
+function _detect() {
   if [ "$(sudo id -un 2>&1)" = 'root' ]; then
     [ -f "$SYSTEM_RC/mkshrc" ] && {
       echo "$SYSTEM_RC"
@@ -234,7 +234,7 @@ rc_tmpfs="$(_detect "$rc_root")" # check for root locations
 if [ "$rc_root" != "$rc_tmpfs" ]; then
   if [ ! -d "$rc_tmpfs/bin" ]; then
     # Create a temporary backup directory
-    rc_bak="$(mktemp -d)"
+    local rc_bak="$(mktemp -d)"
 
     # Copy all existing files from the tmpfs target into the backup directory
     sudo cp -af "$rc_tmpfs"/* "$rc_bak"

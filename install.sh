@@ -1,16 +1,16 @@
-#!/bin/env sh
+#!/usr/bin/env mksh
 
 # ==UserScript==
 # @name         Android Environment Installer
 # @namespace    https://github.com/user/mkshrc/
-# @version      1.0
+# @version      1.1
 # @description  Installs mkshrc shell environment, Frida, BusyBox, and additional binaries on Android devices
 # @author       user
 # @match        Android
 # ==/UserScript==
 
 # Check if a command exists in PATH
-_exist() {
+function _exist() {
   command -v "$1" >/dev/null 2>&1
 }
 
