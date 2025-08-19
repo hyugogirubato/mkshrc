@@ -1,4 +1,4 @@
-#!/usr/bin/env mksh
+#!/system/bin/sh
 
 # ==UserScript==
 # @name         Android Environment Installer
