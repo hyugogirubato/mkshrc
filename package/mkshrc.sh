@@ -86,6 +86,33 @@ _exist find && [ "$color_prompt" = yes ] && {
   alias cfind="find \"$*\" | sed 's/\\n/ /g' | xargs $(_resolve ls) -d"
 }
 
+function pull() {
+  local src_path="$1"
+  local tmp_path="$TMPDIR/$(basename "$src_path")"
+
+  # Decide whether to use sudo (only if current user is NOT root)
+  [ "$(sudo id -un 2>&1)" = 'root' ] && local prefix='sudo'
+
+  # Copy file into TMPDIR (suppressing output). Fail fast if copy fails.
+  $prefix cp -af "$src_path" "$tmp_path" >/dev/null 2>&1 || {
+    echo "Failed to copy $src_path"
+    return 1
+  }
+
+  # Change ownership to 'shell:shell' so that the adb shell user can access it.
+  # -R ensures it works for directories too.
+  $prefix chown -R shell:shell "$tmp_path" >/dev/null 2>&1 || {
+    echo "Failed to chown $tmp_path"
+  }
+
+  # Set SELinux context to match shell data files, again recursive for directories.
+  $prefix chcon -R u:object_r:shell_data_file:s0 "$tmp_path" >/dev/null 2>&1 || {
+    echo "Failed to set SELinux context on $tmp_path"
+  }
+
+  echo "Pulled: $tmp_path"
+}
+export pull
 # Fix mksh vi mode issues when editing multi-line
 function _vi() {
   # https://github.com/matan-h/adb-shell/blob/main/startup.sh#L52
