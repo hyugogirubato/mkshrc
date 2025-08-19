@@ -113,6 +113,31 @@ function pull() {
   echo "Pulled: $tmp_path"
 }
 export pull
+
+function restart() {
+  # Verify that the current user has root privileges
+  [ "$(sudo id -un 2>&1)" = 'root' ] || {
+    echo 'Permission denied. Privileged user not available.'
+    exit 1
+  }
+
+  # Soft reboot via init: stop and restart the Android framework.
+  # This does not reboot the kernel, only restarts system services.
+  # Reference: https://source.android.com/docs/core/runtime/soft-restart
+  sudo stop
+  sudo start
+
+  # Restart zygote (restarts all apps & system services without stopping everything).
+  #sudo setprop ctl.restart zygote
+
+  # Forcefully kill zygote process (system will restart it automatically).
+  #sudo kill -9 $(pidof zygote)
+
+  # Kill system_server (will be restarted by zygote).
+  #sudo kill -9 $(pidof system_server)
+}
+export restart
+
 # Fix mksh vi mode issues when editing multi-line
 function _vi() {
   # https://github.com/matan-h/adb-shell/blob/main/startup.sh#L52
