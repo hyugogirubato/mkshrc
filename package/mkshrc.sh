@@ -3,7 +3,7 @@
 # ==UserScript==
 # @name         mkshrc
 # @namespace    https://github.com/user/mkshrc/
-# @version      1.0
+# @version      1.1
 # @description  Advanced shell environment configuration for Android devices (mksh/sh compatible)
 # @author       user
 # @match        Android
@@ -112,7 +112,7 @@ function man() {
     return 16
   fi
 
-  "$binary" --help
+  $binary --help
 }
 export man
 
