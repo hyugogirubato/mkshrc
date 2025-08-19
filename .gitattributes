@@ -4,7 +4,3 @@ package/**/* filter=lfs diff=lfs merge=lfs -text
 # Exclude shell scripts and text files from LFS
 package/**/*.sh -filter -diff -merge text
 package/**/*.txt -filter -diff -merge text
-
-# Exclude frida-server binaries from LFS
-#package/**/frida/frida-server* -filter -diff -merge text
-
