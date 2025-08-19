@@ -1,4 +1,4 @@
-#!/bin/env sh
+#!/usr/bin/env mksh
 
 # ==UserScript==
 # @name         update-ca-certificates (Android)
