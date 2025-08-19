@@ -53,6 +53,8 @@ hash_path="$TMPDIR/$crt_name"
 openssl x509 -in "$crt_path" >"$hash_path"
 openssl x509 -in "$crt_path" -fingerprint -text -noout >>"$hash_path"
 
+# TODO: Do not remount in tmpfs if the directory is writable
+
 # https://github.com/httptoolkit/httptoolkit-server/blob/main/src/interceptors/android/adb-commands.ts#L417
 # Create a separate temp directory, to hold the current certificates
 # Without this, when we add the mount we can't read the current certs anymore.
