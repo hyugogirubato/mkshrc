@@ -47,8 +47,8 @@ crt_name="$crt_hash.0"
 
 echo "Updating certificates in $CERT_SYSTEM..."
 
-# Prepare new certificate file
 # https://github.com/user/JustTrustMe
+# Prepare new certificate file
 hash_path="$TMPDIR/$crt_name"
 openssl x509 -in "$crt_path" >"$hash_path"
 openssl x509 -in "$crt_path" -fingerprint -text -noout >>"$hash_path"
