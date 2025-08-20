@@ -252,7 +252,7 @@ function frida() {
       echo 'Already running' >&2
       return 1
     }
-    #sudo setenforce 0 >/dev/null 2>&1 # disable SELinux temporarily
+    sudo setenforce 0 >/dev/null 2>&1 # disable SELinux temporarily
     sudo frida-server -D || {
       echo 'Start failed' >&2
       return 1
@@ -267,7 +267,7 @@ function frida() {
   stop)
     # Stop Frida server and re-enable SELinux
     sudo kill -9 $(pgrep -f frida-server) 2>/dev/null
-    sudo setenforce 1 >/dev/null 2>&1
+    #sudo setenforce 1 >/dev/null 2>&1
     sleep 1
 
     frida status >/dev/null 2>&1 && {
