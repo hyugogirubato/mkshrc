@@ -115,6 +115,14 @@ function pull() {
 export pull
 
 function restart() {
+  # Magisk & other root managers rely on overlayfs or tmpfs mounts that insert or hide su binaries and management files at boot.
+  # When you do a soft reboot (zygote / framework restart, not full kernel reboot):
+  # - The system services restart.
+  # - But Magisk’s init-time mount overlays don’t get re-applied, because init didn’t rerun.
+  # Result:
+  # - /sbin/su, /system/xbin/su, etc. may not be mounted anymore.
+  # - which su won’t find anything in $PATH.
+
   # Verify that the current user has root privileges
   [ "$(sudo id -un 2>&1)" = 'root' ] || {
     echo 'Permission denied. Privileged user not available.'
@@ -124,16 +132,42 @@ function restart() {
   # Soft reboot via init: stop and restart the Android framework.
   # This does not reboot the kernel, only restarts system services.
   # Reference: https://source.android.com/docs/core/runtime/soft-restart
-  sudo stop
-  sudo start
 
-  # Restart zygote (restarts all apps & system services without stopping everything).
-  #sudo setprop ctl.restart zygote
+  # Effect: Kills all Android framework services and restarts them.
+  # Pros: Works on older Android (pre-Android 8 especially), very thorough.
+  # Cons:
+  # - Slow (almost like a full reboot).
+  # - On newer Android (10+), init often blocks this, or services don’t come back cleanly.
+  # - Risk of bootloop if start doesn’t fully reinitialize.
+  # Not very stable on modern Android.
+  #sudo stop
+  #sudo start
 
-  # Forcefully kill zygote process (system will restart it automatically).
+  # Effect: Signals init to restart the zygote service (which spawns all apps and system_server).
+  # Pros:
+  # - Officially supported mechanism.
+  # - Fast, cleaner than killing processes.
+  # - Works on Android 5 → Android 14.
+  # Cons: Some devices split into zygote / zygote_secondary, so you may need both.
+  # Most stable & recommended across versions.
+  sudo setprop ctl.restart zygote
+
+  # Effect: Hard-kills zygote, Android restarts it automatically.
+  # Pros: Works even if setprop isn’t available or blocked.
+  # Cons:
+  # - Dirty (no graceful shutdown).
+  # - Can cause crashes, logs filled with errors.
+  # - On some devices, may trigger watchdog → full reboot.
+  # Works, but hacky and less reliable.
   #sudo kill -9 $(pidof zygote)
 
-  # Kill system_server (will be restarted by zygote).
+  # Effect: Kills system_server; zygote will restart it.
+  # Pros: Faster than full zygote restart.
+  # Cons:
+  # - Leaves zygote alive (not a clean reset).
+  # - Often unstable afterward (services missing, ANRs).
+  # - Some Android versions will panic → reboot.
+  # Least stable.
   #sudo kill -9 $(pidof system_server)
 }
 export restart
