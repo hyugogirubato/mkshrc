@@ -3,7 +3,7 @@
 # ==UserScript==
 # @name         mkshrc
 # @namespace    https://github.com/user/mkshrc/
-# @version      1.2
+# @version      1.3
 # @description  Advanced shell environment configuration for Android devices (mksh/sh compatible)
 # @author       user
 # @match        Android
@@ -63,15 +63,16 @@ if [ "$color_prompt" = yes ]; then
 fi
 
 # Common shortcuts
-alias ll='ls -alF' # long list with file types
-alias la='ls -A'   # list all except . and ..
-alias l='ls -CF'   # compact list
-alias rm='rm -rf'  # recursive remove (dangerous but convenient)
+alias ll="$(_resolve ls) -alF"     # long list with file types
+alias la="$(_resolve ls) -A"       # list all except . and ..
+alias l="$(_resolve ls) -CF"       # compact list
+alias rm='rm -rf'                  # recursive remove (dangerous but convenient)
+alias reset='stty sane < /dev/tty' # restore terminal to default state
 
 # Networking commands
 _exist ip && {
   [ "$color_prompt" = yes ] && alias ip='ip -c'
-  alias ipa='ip a' # Show IP addresses
+  alias ipa="$(_resolve ip) a" # Show IP addresses
 }
 
 # Fallbacks for common tools if not present
