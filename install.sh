@@ -35,7 +35,7 @@ mkdir -p "$rc_bin"
 
 # Provide supolicy fallback (used in Magisk contexts)
 # https://download.chainfire.eu/1220/SuperSU/
-_exist 'supolicy' || {
+_exist supolicy || {
   echo '[I] Installing supolicy binaries...'
   # https://www.synacktiv.com/en/offers/trainings/android-for-security-engineers
   cp -f "$rc_package/$CPU_ABI/supolicy/supolicy" "$rc_bin/supolicy"
