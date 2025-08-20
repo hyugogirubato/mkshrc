@@ -59,10 +59,10 @@ source /data/local/tmp/mkshrc
 
 ## Extra Utilities
 
-* `update-ca-certificate <path>` – install custom CA certificates into the Android system trust store (requires root).
-* `restart` – perform a **soft reboot** of the Android framework (requires root).
+* `update-ca-certificate <path>` – install custom CA certificates into the Android system trust store.
+* `restart` – perform a **soft reboot** of the Android framework.
 * `pull <path>` – safely copy a file from the system into `/data/local/tmp/`.
-* `frida {start|status|stop|version}` – manage the Frida server lifecycle (requires root).
+* `frida {start|status|stop|version}` – manage the Frida server lifecycle.
 * BusyBox applets are symlinked automatically (except `man`).
 
 ## Disclaimer
