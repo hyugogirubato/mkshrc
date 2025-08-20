@@ -3,7 +3,7 @@
 # ==UserScript==
 # @name         mkshrc
 # @namespace    https://github.com/user/mkshrc/
-# @version      1.1
+# @version      1.2
 # @description  Advanced shell environment configuration for Android devices (mksh/sh compatible)
 # @author       user
 # @match        Android
@@ -277,6 +277,10 @@ function frida() {
       _exist magisk && echo 'Use Magisk to stop Frida.' >&2 || echo 'Frida is still running.' >&2
       return 1
     }
+    ;;
+  version)
+    # Show Frida version
+    frida-server --version
     ;;
   *)
     # Invalid usage
