@@ -223,11 +223,16 @@ function sudo() {
     }
 
     # Detect su format (standard or Magisk)
-    if su --help 2>&1 | grep -q -- '-c'; then
-      su -c "$prompt"
-    else
-      su root "$prompt"
+    local su_pty="$(_resolve su) root"
+    if su ---help 2>&1 | grep -q -- '-c'; then
+      su_pty="$(_resolve su) -c"
     fi
+
+    # Force PTY resolution
+    reset
+
+    # https://stackoverflow.com/questions/27274339/how-to-use-su-command-over-adb-shell/
+    $su_pty $prompt
   fi
 }
 export sudo
