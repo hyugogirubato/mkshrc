@@ -249,23 +249,20 @@ function frida() {
   start)
     # Start Frida server if not already running
     frida status >/dev/null 2>&1 && {
-      echo 'Frida is already running.' >&2
+      echo 'Already running' >&2
       return 1
     }
     #sudo setenforce 0 >/dev/null 2>&1 # disable SELinux temporarily
     sudo frida-server -D || {
-      echo 'Failed to start Frida.' >&2
+      echo 'Start failed' >&2
       return 1
     }
     ;;
   status)
     # Check if Frida server is running
     local pid="$(pgrep -f frida-server)"
-    [ -z "$pid" ] && {
-      echo 'Frida is not running.' >&2
-      return 1
-    }
-    echo "Frida is running with PID: $pid"
+    [ -z "$pid" ] && echo 'Stopped' && return
+    echo "Running ($pid)"
     ;;
   stop)
     # Stop Frida server and re-enable SELinux
@@ -274,9 +271,10 @@ function frida() {
     sleep 1
 
     frida status >/dev/null 2>&1 && {
-      _exist magisk && echo 'Use Magisk to stop Frida.' >&2 || echo 'Frida is still running.' >&2
+      _exist magisk && echo 'Use Magisk to stop' >&2 || echo 'Still running' >&2
       return 1
     }
+    echo 'Stopped'
     ;;
   version)
     # Show Frida version
