@@ -3,7 +3,7 @@
 # ==UserScript==
 # @name         update-ca-certificates (Android)
 # @namespace    https://github.com/user/mkshrc/
-# @version      1.0
+# @version      1.1
 # @description  Inject custom CA certificates into Android system trust store
 # @author       user
 # ==/UserScript==
@@ -53,28 +53,36 @@ hash_path="$TMPDIR/$crt_name"
 openssl x509 -in "$crt_path" >"$hash_path"
 openssl x509 -in "$crt_path" -fingerprint -text -noout >>"$hash_path"
 
-# TODO: Do not remount in tmpfs if the directory is writable
+# Temporary file path we'll use to check writability of the system cert dir.
+# If we can successfully create this file, we know CERT_SYSTEM is writable.
+crt_check="$CERT_SYSTEM/00000000.0"
 
-# https://github.com/httptoolkit/httptoolkit-server/blob/main/src/interceptors/android/adb-commands.ts#L417
-# Create a separate temp directory, to hold the current certificates
-# Without this, when we add the mount we can't read the current certs anymore.
-crt_bak="$(mktemp -d)"
+# If the directory is not writable (touch fails) we need to remount it:
+if ! touch "$crt_check" >/dev/null 2>&1; then
+  # https://github.com/httptoolkit/httptoolkit-server/blob/main/src/interceptors/android/adb-commands.ts#L417
+  # Create a separate temp directory, to hold the current certificates
+  # Without this, when we add the mount we can't read the current certs anymore.
+  crt_bak="$(mktemp -d)"
 
-# Copy out the existing certificates
-if [ -d "$CERT_APEX" ]; then
-  sudo cp -af "$CERT_APEX"/* "$crt_bak"
-else
-  sudo cp -af "$CERT_SYSTEM"/* "$crt_bak"
+  # Copy out the existing certificates
+  if [ -d "$CERT_APEX" ]; then
+    sudo cp -af "$CERT_APEX"/* "$crt_bak"
+  else
+    sudo cp -af "$CERT_SYSTEM"/* "$crt_bak"
+  fi
+
+  # Create the in-memory mount on top of the system certs folder
+  sudo mount -t tmpfs tmpfs "$CERT_SYSTEM"
+
+  # Copy the existing certs back into the tmpfs mount, so we keep trusting them
+  sudo cp -af "$crt_bak"/* "$CERT_SYSTEM"
+
+  # Copy our new cert in, so we trust that too
+  sudo mv "$hash_path" "$CERT_SYSTEM"
 fi
 
-# Create the in-memory mount on top of the system certs folder
-sudo mount -t tmpfs tmpfs "$CERT_SYSTEM"
-
-# Copy the existing certs back into the tmpfs mount, so we keep trusting them
-sudo cp -af "$crt_bak"/* "$CERT_SYSTEM"
-
-# Copy our new cert in, so we trust that too
-sudo mv "$hash_path" "$CERT_SYSTEM"
+# Clean up the temporary test file if it was created.
+sudo rm -rf "$crt_check"
 
 # Update the perms & selinux context labels, so everything is as readable as before
 sudo chown -R root:root "$CERT_SYSTEM"
