@@ -148,7 +148,7 @@ function restart() {
   # Pros:
   # - Officially supported mechanism.
   # - Fast, cleaner than killing processes.
-  # - Works on Android 5 → Android 14.
+  # - Works on Android 5 → Android latest.
   # Cons: Some devices split into zygote / zygote_secondary, so you may need both.
   # Most stable & recommended across versions.
   sudo setprop ctl.restart zygote
