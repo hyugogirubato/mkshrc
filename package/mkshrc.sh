@@ -284,7 +284,7 @@ function frida() {
     ;;
   *)
     # Invalid usage
-    echo 'Usage: frida {start|status|stop}' >&2
+    echo 'Usage: frida {start|status|stop|version}' >&2
     return 1
     ;;
   esac
