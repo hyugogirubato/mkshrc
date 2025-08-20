@@ -286,10 +286,6 @@ function frida() {
     }
     echo 'Stopped'
     ;;
-  version)
-    # Show Frida version
-    frida-server --version
-    ;;
   *)
     # Invalid usage
     echo 'Usage: frida {start|status|stop|version}' >&2
