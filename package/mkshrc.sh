@@ -257,6 +257,7 @@ function frida() {
       echo 'Start failed' >&2
       return 1
     }
+    echo 'Started'
     ;;
   status)
     # Check if Frida server is running
