@@ -323,7 +323,7 @@ rc_tmpfs="$(_detect "$rc_root")" # check for root locations
 if [ "$rc_root" != "$rc_tmpfs" ]; then
   if [ ! -d "$rc_tmpfs/bin" ]; then
     # Create a temporary backup directory
-    local rc_bak="$(mktemp -d)"
+    rc_bak="$(mktemp -d)"
 
     # Copy all existing files from the tmpfs target into the backup directory
     sudo cp -af "$rc_tmpfs"/* "$rc_bak"
