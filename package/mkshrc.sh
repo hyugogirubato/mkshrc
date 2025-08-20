@@ -262,7 +262,10 @@ function frida() {
   status)
     # Check if Frida server is running
     local pid="$(pgrep -f frida-server)"
-    [ -z "$pid" ] && echo 'Stopped' && return
+    [ -z "$pid" ] && {
+      echo 'Stopped'
+      return 1
+    }
     echo "Running ($pid)"
     ;;
   stop)
