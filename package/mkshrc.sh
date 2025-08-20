@@ -239,6 +239,12 @@ function frida() {
     return 1
   }
 
+  # Show Frida version
+  [ "$1" = 'version' ] && {
+    frida-server --version
+    return
+  }
+
   # Verify that the current user has root privileges
   [ "$(sudo id -un 2>&1)" = 'root' ] || {
     echo 'Permission denied. Privileged user not available.'
