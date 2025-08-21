@@ -3,7 +3,7 @@
 # ==UserScript==
 # @name         mkshrc
 # @namespace    https://github.com/user/mkshrc/
-# @version      1.3
+# @version      1.4
 # @description  Advanced shell environment configuration for Android devices (mksh/sh compatible)
 # @author       user
 # @match        Android
@@ -210,6 +210,7 @@ function sudo() {
     return 1
   }
 
+  # Resolve binary path and rebuild command
   local binary="$(_resolve "$1")"
   local prompt="$(echo "$@" | sed "s:$1:$binary:g")"
 
@@ -228,11 +229,17 @@ function sudo() {
       su_pty="$(_resolve su) -c"
     fi
 
-    # Force PTY resolution
+    # Reset PTY to avoid issues with old su / Magisk shells
     reset
 
     # https://stackoverflow.com/questions/27274339/how-to-use-su-command-over-adb-shell/
-    $su_pty $prompt
+    # Quote the command only if needed to preserve spaces or flags
+    # Ensures aliases and multi-word commands are interpreted safely
+    if [ "$($su_pty echo root)" = 'root' ]; then
+      $su_pty $prompt
+    else
+      $su_pty "$prompt"
+    fi
   fi
 }
 export sudo
