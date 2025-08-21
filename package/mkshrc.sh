@@ -351,6 +351,7 @@ if [ "$rc_root" != "$rc_tmpfs" ]; then
     sudo chown -R root:root "$rc_tmpfs"
 
     # Restoring SELinux objects by default
+    # https://cs.android.com/android/platform/superproject/+/master:system/sepolicy/
     sudo chcon -R u:object_r:system_file:s0 "$rc_tmpfs"
     sudo chcon u:object_r:cgroup_desc_file:s0 "$rc_tmpfs/cgroups.json" >/dev/null 2>&1
     sudo chcon u:object_r:system_font_fallback_file:s0 "$rc_tmpfs/font_fallback.xml" >/dev/null 2>&1
