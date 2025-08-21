@@ -25,7 +25,7 @@
 1. Push the installer package to your device:
 
    ```bat
-   adb push package/ /data/local/tmp/package
+   adb push package/ /data/local/tmp/
    adb push install.sh /data/local/tmp/mkshrc
    ```
 
