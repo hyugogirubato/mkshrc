@@ -229,13 +229,16 @@ function sudo() {
       su_pty="$(_resolve su) -c"
     fi
 
+    # Ensures aliases and multi-word commands are interpreted safely
+    $su_pty echo root 2>&1 | grep -q '^root$'
+    local quoted=$?
+
     # Reset PTY to avoid issues with old su / Magisk shells
     reset
 
     # https://stackoverflow.com/questions/27274339/how-to-use-su-command-over-adb-shell/
     # Quote the command only if needed to preserve spaces or flags
-    # Ensures aliases and multi-word commands are interpreted safely
-    if [ "$($su_pty echo root)" = 'root' ]; then
+    if [ $quoted -eq 0 ]; then
       $su_pty $prompt
     else
       $su_pty "$prompt"
