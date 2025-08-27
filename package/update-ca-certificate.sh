@@ -3,7 +3,7 @@
 # ==UserScript==
 # @name         update-ca-certificates (Android)
 # @namespace    https://github.com/user/mkshrc/
-# @version      1.1
+# @version      1.2
 # @description  Inject custom CA certificates into Android system trust store
 # @author       user
 # ==/UserScript==
@@ -89,7 +89,10 @@ sudo chown -R root:root "$CERT_SYSTEM"
 sudo chmod 644 "$CERT_SYSTEM"/*
 
 sudo chcon -R u:object_r:system_file:s0 "$CERT_SYSTEM"
-sudo chcon -R u:object_r:system_security_cacerts_file:s0 "$CERT_SYSTEM" >/dev/null 2>&1
+#sudo chcon -R u:object_r:system_security_cacerts_file:s0 "$CERT_SYSTEM" >/dev/null 2>&1
+
+# Restore SELinux context for all certificate files
+sudo restorecon -R "$CERT_SYSTEM" >/dev/null 2>&1
 
 echo '1 added, 0 removed; done.'
 
