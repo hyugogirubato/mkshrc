@@ -256,6 +256,7 @@ function frida() {
   }
 
   # TODO: adding non-root frida wrapper helper
+  # https://github.com/ThatNotEasy/mkshrc/blob/main/package/mkshrc.sh#L313
 
   # Show Frida version
   [ "$1" = 'version' ] && {
