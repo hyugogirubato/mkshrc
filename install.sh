@@ -3,7 +3,7 @@
 # ==UserScript==
 # @name         Android Environment Installer
 # @namespace    https://github.com/user/mkshrc/
-# @version      1.1
+# @version      1.2
 # @description  Install mkshrc shell environment, Frida, BusyBox, and additional binaries on Android devices
 # @author       user
 # @match        Android
@@ -72,7 +72,7 @@ chmod -R 777 "$rc_bin"
 echo '[I] Setting up BusyBox commands...'
 busybox="$rc_bin/busybox"
 for applet in $("$busybox" --list | grep -vE '^man$'); do
-  _exist "$applet" || ln -s "$busybox" "$rc_bin/$applet"
+  _exist "$applet" || cp -af "$busybox" "$rc_bin/$applet"
 done
 
 # Install RC script to configure shell environment
