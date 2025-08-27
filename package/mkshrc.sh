@@ -3,7 +3,7 @@
 # ==UserScript==
 # @name         mkshrc
 # @namespace    https://github.com/user/mkshrc/
-# @version      1.4
+# @version      1.5
 # @description  Advanced shell environment configuration for Android devices (mksh/sh compatible)
 # @author       user
 # @match        Android
@@ -363,19 +363,19 @@ if [ "$rc_root" != "$rc_tmpfs" ]; then
     # Restoring SELinux objects by default
     # https://cs.android.com/android/platform/superproject/+/master:system/sepolicy/
     sudo chcon -R u:object_r:system_file:s0 "$rc_tmpfs"
-    sudo chcon u:object_r:cgroup_desc_file:s0 "$rc_tmpfs/cgroups.json" >/dev/null 2>&1
-    sudo chcon u:object_r:system_font_fallback_file:s0 "$rc_tmpfs/font_fallback.xml" >/dev/null 2>&1
-    sudo chcon u:object_r:system_event_log_tags_file:s0 "$rc_tmpfs/event-log-tags" >/dev/null 2>&1
-    sudo chcon u:object_r:system_group_file:s0 "$rc_tmpfs/group" >/dev/null 2>&1
-    sudo chcon u:object_r:system_passwd_file:s0 "$rc_tmpfs/passwd" >/dev/null 2>&1
-    sudo chcon -R u:object_r:system_perfetto_config_file:s0 "$rc_tmpfs/perfetto" >/dev/null 2>&1
-    sudo chcon u:object_r:system_linker_config_file:s0 "$rc_tmpfs/ld.config."* >/dev/null 2>&1
-    sudo chcon -R u:object_r:system_seccomp_policy_file:s0 "$rc_tmpfs/seccomp_policy/" >/dev/null 2>&1
-    sudo chcon u:object_r:system_linker_config_file:s0 "$rc_tmpfs/somxreg.conf" >/dev/null 2>&1
-    sudo chcon u:object_r:task_profiles_file:s0 "$rc_tmpfs/task_profiles.json" >/dev/null 2>&1
+    #sudo chcon u:object_r:cgroup_desc_file:s0 "$rc_tmpfs/cgroups.json" >/dev/null 2>&1
+    #sudo chcon u:object_r:system_font_fallback_file:s0 "$rc_tmpfs/font_fallback.xml" >/dev/null 2>&1
+    #sudo chcon u:object_r:system_event_log_tags_file:s0 "$rc_tmpfs/event-log-tags" >/dev/null 2>&1
+    #sudo chcon u:object_r:system_group_file:s0 "$rc_tmpfs/group" >/dev/null 2>&1
+    #sudo chcon u:object_r:system_passwd_file:s0 "$rc_tmpfs/passwd" >/dev/null 2>&1
+    #sudo chcon -R u:object_r:system_perfetto_config_file:s0 "$rc_tmpfs/perfetto" >/dev/null 2>&1
+    #sudo chcon u:object_r:system_linker_config_file:s0 "$rc_tmpfs/ld.config."* >/dev/null 2>&1
+    #sudo chcon -R u:object_r:system_seccomp_policy_file:s0 "$rc_tmpfs/seccomp_policy/" >/dev/null 2>&1
+    #sudo chcon u:object_r:system_linker_config_file:s0 "$rc_tmpfs/somxreg.conf" >/dev/null 2>&1
+    #sudo chcon u:object_r:task_profiles_file:s0 "$rc_tmpfs/task_profiles.json" >/dev/null 2>&1
 
-    # Provide edition support
-    sudo chcon -R u:object_r:shell_data_file:s0 "$rc_tmpfs/mkshrc" "$rc_tmpfs/bin"
+    # Restore SELinux context for all files in tmpfs
+    sudo restorecon -R "$rc_tmpfs" >/dev/null 2>&1
 
     rc_root="$rc_tmpfs"
     echo '[I] Script mount permanently until next reboot'
