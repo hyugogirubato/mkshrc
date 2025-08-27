@@ -377,11 +377,12 @@ if [ "$rc_root" != "$rc_tmpfs" ]; then
     # Restore SELinux context for all files in tmpfs
     sudo restorecon -R "$rc_tmpfs" >/dev/null 2>&1
 
-    rc_root="$rc_tmpfs"
     echo '[I] Script mount permanently until next reboot'
   #else
   #  echo '[D] RC already defined persistently'
   fi
+
+  rc_root="$rc_tmpfs"
 else
   echo '[E] RC in persistent mode unavailable'
   echo '[W] Script sets for current shell context only'
