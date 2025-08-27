@@ -355,7 +355,7 @@ if [ "$rc_root" != "$rc_tmpfs" ]; then
     sudo cp -af "$rc_root/mkshrc" "$rc_tmpfs/mkshrc"
 
     # Recursively copy the "bin" folder (containing binaries) into tmpfs
-    sudo ln -sf "$rc_root/bin" "$rc_tmpfs/bin"
+    sudo cp -af "$rc_root/bin" "$rc_tmpfs/bin"
 
     # Set ownership of all files in tmpfs to root:root
     sudo chown -R root:root "$rc_tmpfs"
