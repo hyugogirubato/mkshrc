@@ -50,7 +50,7 @@ export STORAGE='/storage/self/primary'        # Default shared storage (internal
 ###############################################################################
 
 # Detect whether the terminal supports color (via ls check)
-ls --color=auto "$TMPDIR" >/dev/null 2>&1 && color_prompt=yes
+ls --color=auto '/system' 2>&1 | grep -q -- '--color' || color_prompt=yes
 
 if [ "$color_prompt" = yes ]; then
   # Enable colorized output if supported
