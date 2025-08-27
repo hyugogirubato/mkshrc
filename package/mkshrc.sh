@@ -352,7 +352,7 @@ if [ "$rc_root" != "$rc_tmpfs" ]; then
     sudo rm -rf "$rc_bak" # Clean up temporary backup
 
     # Copy the current script into tmpfs
-    sudo ln -sf "$DEFAULT_RC/mkshrc" "$rc_tmpfs/mkshrc"
+    sudo cp -af "$rc_root/mkshrc" "$rc_tmpfs/mkshrc"
 
     # Recursively copy the "bin" folder (containing binaries) into tmpfs
     sudo ln -sf "$rc_root/bin" "$rc_tmpfs/bin"
