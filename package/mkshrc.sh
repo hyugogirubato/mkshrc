@@ -40,6 +40,7 @@ function _resolve() {
 ###############################################################################
 
 export HOSTNAME="$(getprop ro.boot.serialno)" # Android device serial
+[ -z "$HOSTNAME" ] && export HOSTNAME="$(hostname -s)"
 export USER="$(id -u -n)"                     # Current username
 export LOGNAME="$USER"                        # Ensure LOGNAME matches USER
 export TMPDIR='/data/local/tmp'               # Temporary directory
