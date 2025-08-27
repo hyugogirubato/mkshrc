@@ -255,6 +255,8 @@ function frida() {
     return 1
   }
 
+  # TODO: adding non-root frida wrapper helper
+
   # Show Frida version
   [ "$1" = 'version' ] && {
     frida-server --version
