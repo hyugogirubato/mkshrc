@@ -70,16 +70,6 @@ alias l="$(_resolve ls) -CF"       # compact list
 alias rm='rm -rf'                  # recursive remove (dangerous but convenient)
 alias reset='stty sane < /dev/tty' # restore terminal to default state
 
-# Networking commands
-_exist ip && {
-  [ "$color_prompt" = yes ] && alias ip='ip -c'
-  alias ipa="$(_resolve ip) a" # Show IP addresses
-}
-
-# Fallbacks for common tools if not present
-_exist ss || alias ss='netstat'
-_exist nc || alias nc='netcat'
-
 # Use ps -A if it shows more processes than default ps
 [ "$(ps -A | wc -l)" -gt 1 ] && alias ps='ps -A'
 
@@ -444,6 +434,19 @@ else
     return $e
   }(${ctx_shell}) ${USER}@${HOSTNAME}:${PWD:-?}${ctx_type} '
 fi
+
+###############################################################################
+### Tool Fallbacks
+###############################################################################
+
+# Fallbacks for common tools if not present
+_exist ss || alias ss='netstat'
+_exist nc || alias nc='netcat'
+
+# Create a custom colored find command if both find and color support are available
+_exist find && [ "$color_prompt" = yes ] && {
+  alias cfind="find \"$*\" | sed 's/\\n/ /g' | xargs $(_resolve ls) -d"
+}
 
 # TODO: add persistent history via custom function
 # https://github.com/matan-h/adb-shell/blob/main/startup.sh#L73
