@@ -17,7 +17,7 @@
 | BusyBox      | 1.36.1.1                  | Full applet support      |
 | OpenSSL      | 1.1.1l (NDK 23.0.7599858) | Built with Android NDK   |
 | curl         | 7.78.0 (NDK 23.0.7599858) | With SSL support         |
-| frida-server | 17.2.16, 16.7.9           | Choose version as needed |
+| frida-server | 17.2.17, 16.7.9           | Choose version as needed |
 | supolicy     | 2.82                      | SELinux policy helper    |
 | tcpdump      | 4.9.2 (NDK 18.1.5063045)  | Network packet analyzer  |
 
