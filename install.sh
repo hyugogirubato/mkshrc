@@ -54,6 +54,8 @@ cp -f "$rc_package/$CPU_ABI/busybox/libbusybox.so" "$rc_bin/busybox"
 # https://appuals.com/install-curl-openssl-android/
 cp -f "$rc_package/$CPU_ABI/curl/curl" "$rc_bin/curl"
 cp -f "$rc_package/$CPU_ABI/openssl/openssl" "$rc_bin/openssl"
+# https://android.googlesource.com/platform/external/tcpdump.git/+/refs/heads/android14-qpr2-release/INSTALL.md
+cp -f "$rc_package/$CPU_ABI/tcpdump/tcpdump" "$rc_bin/tcpdump"
 
 # Install script for adding root trust CA certificates
 cp "$rc_package/update-ca-certificate.sh" "$rc_bin/update-ca-certificate"
