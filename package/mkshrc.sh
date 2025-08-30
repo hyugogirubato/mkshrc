@@ -156,6 +156,7 @@ function pull() {
 }
 export pull
 
+# System restart (soft reboot / zygote restart)
 function restart() {
   # Magisk & other root managers rely on overlayfs or tmpfs mounts that insert or hide su binaries and management files at boot.
   # When you do a soft reboot (zygote / framework restart, not full kernel reboot):
