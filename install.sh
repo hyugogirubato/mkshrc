@@ -48,8 +48,8 @@ else
 fi
 
 # Install additional CPU ABI-specific binaries
-# https://github.com/topjohnwu/magisk-files/
 echo '[I] Installing additional binaries...'
+# https://github.com/topjohnwu/magisk-files/
 cp -f "$rc_package/$CPU_ABI/busybox/libbusybox.so" "$rc_bin/busybox"
 # https://appuals.com/install-curl-openssl-android/
 cp -f "$rc_package/$CPU_ABI/curl/curl" "$rc_bin/curl"
