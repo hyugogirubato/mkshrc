@@ -120,6 +120,7 @@ function sudo() {
 }
 export sudo
 
+# Pull files into TMPDIR with proper permissions
 function pull() {
   local src_path="$1"
   local tmp_path="$TMPDIR/$(basename "$src_path")"
