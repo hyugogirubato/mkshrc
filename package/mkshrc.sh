@@ -247,43 +247,47 @@ alias vi=_vi
 
 # Frida server management
 function frida() {
-  # Ensure the frida-server binary is available
+  # Ensure frida-server binary is available
   _exist frida-server || {
     echo 'frida-server binary not found in PATH' >&2
     return 1
   }
 
-  # TODO: adding non-root frida wrapper helper
-  # https://github.com/ThatNotEasy/mkshrc/blob/main/package/mkshrc.sh#L313
-
-  # Show Frida version
-  [ "$1" = 'version' ] && {
-    frida-server --version
-    return
-  }
-
-  # Verify that the current user has root privileges
-  [ "$(sudo id -un 2>&1)" = 'root' ] || {
+  # For start/stop commands, check for root privileges
+  if echo "$1" | grep -Eq '^(-s|-k|--start|--stop|start|stop)$' && [ "$(sudo id -un 2>&1)" != 'root' ]; then
     echo 'Permission denied. Privileged user not available.'
     exit 1
-  }
+  fi
 
+  # Handle commands/options
+  # https://github.com/ThatNotEasy/mkshrc/blob/main/package/mkshrc.sh#L313
   case "$1" in
-  start)
-    # Start Frida server if not already running
-    frida status >/dev/null 2>&1 && {
-      echo 'Already running' >&2
-      return 1
-    }
-    sudo setenforce 0 >/dev/null 2>&1 # disable SELinux temporarily
-    sudo frida-server -D || {
-      echo 'Start failed' >&2
-      return 1
-    }
-    echo 'Started'
+  -h | --help | help)
+    # Display a concise help page
+    cat <<EOF
+usage: frida [OPTIONS]
+
+Manage frida-server on Android devices.
+
+options:
+  -s, --start      Start frida-server (requires root)
+  -k, --stop       Stop frida-server (requires root)
+  -S, --status     Show frida-server status
+  -v, --version    Show frida-server binary version
+  -h, --help       Show this help page
+
+Notes:
+  Root access is required for start/stop operations.
+  SELinux is temporarily disabled when starting the server.
+  Magisk users may manage frida-server via Magisk modules.
+EOF
     ;;
-  status)
-    # Check if Frida server is running
+  -v | --version | version)
+    # Show the version of frida-server
+    frida-server --version
+    ;;
+  -S | --status | status)
+    # Check if frida-server is currently running
     local pid="$(pgrep -f frida-server)"
     [ -z "$pid" ] && {
       echo 'Stopped'
@@ -291,22 +295,42 @@ function frida() {
     }
     echo "Running ($pid)"
     ;;
-  stop)
-    # Stop Frida server and re-enable SELinux
+  -s | --start | start)
+    # Start Frida server if not already running
+    frida status >/dev/null 2>&1 && {
+      echo 'Already running' >&2
+      return 1
+    }
+
+    # Temporarily disable SELinux to allow frida-server startup
+    sudo setenforce 0 >/dev/null 2>&1
+
+    # Start frida-server in daemon mode
+    sudo frida-server -D || {
+      echo 'Start failed' >&2
+      return 1
+    }
+    echo 'Started'
+    ;;
+  -k | --stop | stop)
+    # Stop frida-server
     sudo kill -9 $(pgrep -f frida-server) 2>/dev/null
-    #sudo setenforce 1 >/dev/null 2>&1
     sleep 1
 
+    # Check if frida-server is still running
     frida status >/dev/null 2>&1 && {
       _exist magisk && echo 'Use Magisk to stop' >&2 || echo 'Still running' >&2
       return 1
     }
+
+    # Optional: re-enable SELinux (commented out for safety)
+    # sudo setenforce 1 >/dev/null 2>&1
     echo 'Stopped'
     ;;
   *)
     # Invalid usage
-    echo 'Usage: frida {start|status|stop|version}' >&2
-    return 1
+    frida --help >&2
+    return 255
     ;;
   esac
 }
