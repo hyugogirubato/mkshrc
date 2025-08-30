@@ -67,12 +67,10 @@ cp "$rc_package/update-ca-certificate.sh" "$rc_bin/update-ca-certificate"
 chown -R shell:shell "$rc_bin"
 chmod -R 777 "$rc_bin"
 
-# Set up BusyBox command symlinks for all available applets except 'man'
+# Set up BusyBox command symlinks for all available applets
+# Makes applets callable directly via PATH (system binaries still take priority)
 echo '[I] Setting up BusyBox commands...'
-busybox="$rc_bin/busybox"
-for applet in $("$busybox" --list | grep -vE '^man$'); do
-  _exist "$applet" || cp -af "$busybox" "$rc_bin/$applet"
-done
+"$rc_bin/busybox" --install -s "$rc_bin"
 
 # Install RC script to configure shell environment
 rc_path="$TMPDIR/mkshrc"
