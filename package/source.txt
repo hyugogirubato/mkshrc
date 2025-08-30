@@ -10,3 +10,7 @@ https://github.com/frida/frida/releases/download/17.2.16/frida-server-17.2.16-an
 https://github.com/frida/frida/releases/download/17.2.16/frida-server-17.2.16-android-x86_64.xz
 https://download.chainfire.eu/1220/SuperSU/SR5-SuperSU-v2.82-SR5-20171001224502.zip?retrieve_file=1
 https://github.com/robertying/openssl-curl-android/releases/download/1.1.1l-7.78.0/build.tar.gz
+https://github.com/extremecoders-re/tcpdump-android-builds/files/2734354/tcpdump-x86.zip
+https://github.com/extremecoders-re/tcpdump-android-builds/files/2734355/tcpdump-x86_64.zip
+https://github.com/extremecoders-re/tcpdump-android-builds/files/2734352/tcpdump-arm.zip
+https://github.com/extremecoders-re/tcpdump-android-builds/files/2734353/tcpdump-arm64.zip
