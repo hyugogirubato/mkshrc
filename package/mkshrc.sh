@@ -73,9 +73,15 @@ alias reset='stty sane < /dev/tty' # restore terminal to default state
 # Use ps -A if it shows more processes than default ps
 [ "$(ps -A | wc -l)" -gt 1 ] && alias ps='ps -A'
 
-# Create a custom colored find command if both find and color support are available
-_exist find && [ "$color_prompt" = yes ] && {
-  alias cfind="find \"$*\" | sed 's/\\n/ /g' | xargs $(_resolve ls) -d"
+# Networking commands
+_exist ip && {
+  [ "$color_prompt" = yes ] && alias ip='ip -c'
+  alias ipa="$(_resolve ip) a" # Show IP addresses
+}
+
+# Provide supolicy fallback (used in Magisk contexts)
+_exist magiskpolicy || alias supolicy="LD_LIBRARY_PATH=$rc_bin $rc_bin/supolicy"
+
 # Sudo wrapper (works with root / su / Magisk)
 function sudo() {
   [ $# -eq 0 ] && {
