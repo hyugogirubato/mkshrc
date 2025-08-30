@@ -9,11 +9,6 @@
 # @match        Android
 # ==/UserScript==
 
-# Check if a command exists in PATH
-function _exist() {
-  command -v "$1" >/dev/null 2>&1
-}
-
 # Configurations
 TMPDIR='/data/local/tmp'
 CPU_ABI="$(getprop ro.product.cpu.abi)"
