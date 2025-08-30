@@ -352,11 +352,18 @@ if [ "$rc_root" != "$rc_tmpfs" ]; then
     sudo cp -af "$rc_bak"/* "$rc_tmpfs"
     sudo rm -rf "$rc_bak" # Clean up temporary backup
 
-    # Copy the current script into tmpfs
+    # Copy the current mkshrc into tmpfs
     sudo cp -af "$rc_root/mkshrc" "$rc_tmpfs/mkshrc"
 
-    # Recursively copy the "bin" folder (containing binaries) into tmpfs
-    sudo cp -af "$rc_root/bin" "$rc_tmpfs/bin"
+    # Copy required binaries into tmpfs/bin
+    rc_bin="$rc_tmpfs/bin"
+    sudo mkdir -p "$rc_bin"
+    for file in busybox curl frida-server openssl libsupol.so supolicy update-ca-certificate; do
+      [ -f "$rc_root/bin/$file" ] && sudo cp -af "$rc_root/bin/$file" "$rc_bin/$file"
+    done
+
+    # Setup BusyBox symlinks
+    sudo "$rc_bin/busybox" --install -s "$rc_bin"
 
     # Set ownership of all files in tmpfs to root:root
     sudo chown -R root:root "$rc_tmpfs"
