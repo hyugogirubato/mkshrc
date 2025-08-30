@@ -86,7 +86,49 @@ _exist nc || alias nc='netcat'
 # Create a custom colored find command if both find and color support are available
 _exist find && [ "$color_prompt" = yes ] && {
   alias cfind="find \"$*\" | sed 's/\\n/ /g' | xargs $(_resolve ls) -d"
+# Sudo wrapper (works with root / su / Magisk)
+function sudo() {
+  [ $# -eq 0 ] && {
+    echo 'Usage: sudo <command>' >&2
+    return 1
+  }
+
+  # Resolve binary path and rebuild command
+  local binary="$(_resolve "$1")"
+  local prompt="$(echo "$@" | sed "s:$1:$binary:g")"
+
+  if [ "$(id -u)" -eq 0 ]; then
+    # Already root
+    $prompt
+  else
+    _exist su || {
+      echo 'su binary not found' >&2
+      return 127
+    }
+
+    # Detect su format (standard or Magisk)
+    local su_pty="$(_resolve su) root"
+    if su ---help 2>&1 | grep -q -- '-c'; then
+      su_pty="$(_resolve su) -c"
+    fi
+
+    # Ensures aliases and multi-word commands are interpreted safely
+    $su_pty echo root 2>&1 | grep -q '^root$'
+    local quoted=$?
+
+    # Reset PTY to avoid issues with old su / Magisk shells
+    reset
+
+    # https://stackoverflow.com/questions/27274339/how-to-use-su-command-over-adb-shell/
+    # Quote the command only if needed to preserve spaces or flags
+    if [ $quoted -eq 0 ]; then
+      $su_pty $prompt
+    else
+      $su_pty "$prompt"
+    fi
+  fi
 }
+export sudo
 
 function pull() {
   local src_path="$1"
@@ -182,71 +224,6 @@ function _vi() {
   set -o emacs -o vi-tabcomplete
 }
 alias vi=_vi
-
-# Basic replacement for "man" since Android usually lacks it
-function man() {
-  local binary="$(_resolve "$1" | cut -d ' ' -f1)"
-
-  # Handle empty or recursive call (man man)
-  if [ -z "$binary" ] || [ "$binary" = 'man' ]; then
-    echo -e "What manual page do you want?\nFor example, try 'man ls'." >&2
-    return 1
-  fi
-
-  # Use --help output as a poor-man’s manual
-  local manual="$("$binary" --help 2>&1)"
-  if [ $? -eq 127 ] || [ -z "$manual" ]; then
-    echo "No manual entry for $binary" >&2
-    return 16
-  fi
-
-  $binary --help
-}
-export man
-
-# Sudo wrapper (works with root / su / Magisk)
-function sudo() {
-  [ $# -eq 0 ] && {
-    echo 'Usage: sudo <command>' >&2
-    return 1
-  }
-
-  # Resolve binary path and rebuild command
-  local binary="$(_resolve "$1")"
-  local prompt="$(echo "$@" | sed "s:$1:$binary:g")"
-
-  if [ "$(id -u)" -eq 0 ]; then
-    # Already root
-    $prompt
-  else
-    _exist su || {
-      echo 'su binary not found' >&2
-      return 127
-    }
-
-    # Detect su format (standard or Magisk)
-    local su_pty="$(_resolve su) root"
-    if su ---help 2>&1 | grep -q -- '-c'; then
-      su_pty="$(_resolve su) -c"
-    fi
-
-    # Ensures aliases and multi-word commands are interpreted safely
-    $su_pty echo root 2>&1 | grep -q '^root$'
-    local quoted=$?
-
-    # Reset PTY to avoid issues with old su / Magisk shells
-    reset
-
-    # https://stackoverflow.com/questions/27274339/how-to-use-su-command-over-adb-shell/
-    # Quote the command only if needed to preserve spaces or flags
-    if [ $quoted -eq 0 ]; then
-      $su_pty $prompt
-    else
-      $su_pty "$prompt"
-    fi
-  fi
-}
-export sudo
 
 # Frida server management
 function frida() {
