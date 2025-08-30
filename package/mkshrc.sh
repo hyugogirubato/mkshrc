@@ -124,9 +124,10 @@ export sudo
 function pull() {
   local src_path="$1"
   local tmp_path="$TMPDIR/$(basename "$src_path")"
+  local prefix=''
 
   # Decide whether to use sudo (only if current user is NOT root)
-  [ "$(sudo id -un 2>&1)" = 'root' ] && local prefix='sudo'
+  [ "$(sudo id -un 2>&1)" = 'root' ] && prefix='sudo'
 
   # Copy file into TMPDIR (suppressing output). Fail fast if copy fails.
   $prefix cp -af "$src_path" "$tmp_path" >/dev/null 2>&1 || {
