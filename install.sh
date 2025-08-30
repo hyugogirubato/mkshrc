@@ -3,8 +3,8 @@
 # ==UserScript==
 # @name         Android Environment Installer
 # @namespace    https://github.com/user/mkshrc/
-# @version      1.2
-# @description  Install mkshrc shell environment, Frida, BusyBox, and additional binaries on Android devices
+# @version      1.3
+# @description  Install mkshrc shell environment and additional binaries on Android devices
 # @author       user
 # @match        Android
 # ==/UserScript==
