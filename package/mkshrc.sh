@@ -3,14 +3,14 @@
 # ==UserScript==
 # @name         mkshrc
 # @namespace    https://github.com/user/mkshrc/
-# @version      1.5
+# @version      1.6
 # @description  Advanced shell environment configuration for Android devices (mksh/sh compatible)
 # @author       user
 # @match        Android
 # ==/UserScript==
 
 ###############################################################################
-# Utility Functions
+### Utility Functions
 ###############################################################################
 
 # Check if a command exists in PATH
@@ -36,7 +36,7 @@ function _resolve() {
 }
 
 ###############################################################################
-# Environment Setup
+### Environment Setup
 ###############################################################################
 
 export HOSTNAME="$(getprop ro.boot.serialno)" # Android device serial
@@ -47,7 +47,7 @@ export TMPDIR='/data/local/tmp'               # Temporary directory
 export STORAGE='/storage/self/primary'        # Default shared storage (internal)
 
 ###############################################################################
-# Aliases and Quality of Life Shortcuts
+### Aliases and Quality of Life Shortcuts
 ###############################################################################
 
 # Detect whether the terminal supports color (via ls check)
@@ -316,7 +316,7 @@ function frida() {
 export frida
 
 ###############################################################################
-# Persistence Handling (mkshrc overlay before reboot)
+### Persistence Handling (mkshrc overlay before reboot)
 ###############################################################################
 
 SYSTEM_RC='/system/etc'
@@ -401,7 +401,7 @@ echo "$PATH" | grep -q "$rc_bin" || export PATH="$PATH:$rc_bin"
 [ -f "$rc_bin/libsupol.so" ] && alias supolicy="LD_LIBRARY_PATH='$rc_bin' $rc_bin/supolicy"
 
 ###############################################################################
-# Prompt & Colors
+### Prompt & Colors
 ###############################################################################
 
 set +o nohup # disable nohup mode
