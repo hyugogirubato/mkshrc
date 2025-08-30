@@ -1,11 +1,12 @@
 #!/system/bin/sh
 
 # ==UserScript==
-# @name         update-ca-certificates (Android)
+# @name         update-ca-certificates
 # @namespace    https://github.com/user/mkshrc/
 # @version      1.2
 # @description  Inject custom CA certificates into Android system trust store
 # @author       user
+# @match        Android
 # ==/UserScript==
 
 # Import helper functions (e.g. sudo wrapper) from user environment
