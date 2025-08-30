@@ -33,14 +33,13 @@ echo '[I] Cleaning previous installation...'
 rm -rf "$rc_bin"
 mkdir -p "$rc_bin"
 
-# Provide supolicy fallback (used in Magisk contexts)
+# Install supolicy (SELinux policy tool)
+# Provides fallback when Magisk’s magiskpolicy is not available
 # https://download.chainfire.eu/1220/SuperSU/
-_exist supolicy || {
-  echo '[I] Installing supolicy binaries...'
-  # https://www.synacktiv.com/en/offers/trainings/android-for-security-engineers
-  cp -f "$rc_package/$CPU_ABI/supolicy/supolicy" "$rc_bin/supolicy"
-  cp -f "$rc_package/$CPU_ABI/supolicy/libsupol.so" "$rc_bin/libsupol.so"
-}
+echo '[I] Installing supolicy binaries...'
+# https://www.synacktiv.com/en/offers/trainings/android-for-security-engineers
+cp -f "$rc_package/$CPU_ABI/supolicy/supolicy" "$rc_bin/supolicy"
+cp -f "$rc_package/$CPU_ABI/supolicy/libsupol.so" "$rc_bin/libsupol.so"
 
 # Install specific Frida server version for the device's CPU ABI
 # https://github.com/frida/frida/
