@@ -79,9 +79,6 @@ _exist ip && {
   alias ipa="$(_resolve ip) a" # Show IP addresses
 }
 
-# Provide supolicy fallback (used in Magisk contexts)
-_exist magiskpolicy || alias supolicy="LD_LIBRARY_PATH=$rc_bin $rc_bin/supolicy"
-
 # Sudo wrapper (works with root / su / Magisk)
 function sudo() {
   [ $# -eq 0 ] && {
@@ -496,6 +493,9 @@ fi
 ###############################################################################
 ### Tool Fallbacks
 ###############################################################################
+
+# Provide supolicy fallback (used in Magisk contexts)
+_exist magiskpolicy || alias supolicy="LD_LIBRARY_PATH=$rc_bin $rc_bin/supolicy"
 
 # Fallbacks for common tools if not present
 _exist ss || alias ss='netstat'
