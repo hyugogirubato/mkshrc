@@ -233,15 +233,6 @@ function man() {
 }
 export man
 
-# Fix mksh vi mode issues when editing multi-line
-function _vi() {
-  # https://github.com/matan-h/adb-shell/blob/main/startup.sh#L52
-  set +o emacs +o vi-tabcomplete
-  vi "$@"
-  set -o emacs -o vi-tabcomplete
-}
-alias vi=_vi
-
 # Frida server management
 function frida() {
   # Ensure frida-server binary is available
@@ -496,6 +487,15 @@ fi
 
 # Provide supolicy fallback (used in Magisk contexts)
 _exist magiskpolicy || alias supolicy="LD_LIBRARY_PATH=$rc_bin $rc_bin/supolicy"
+
+# Fix mksh vi mode issues when editing multi-line
+function _vi() {
+  # https://github.com/matan-h/adb-shell/blob/main/startup.sh#L52
+  set +o emacs +o vi-tabcomplete
+  "$rc_bin/vi" "$@"
+  set -o emacs -o vi-tabcomplete
+}
+alias vi=_vi
 
 # Fallbacks for common tools if not present
 _exist ss || alias ss='netstat'
