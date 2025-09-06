@@ -45,7 +45,7 @@ crt_name="$crt_hash.0"
 # If already present, exit early
 [ -f "$CERT_SYSTEM/$crt_name" ] && {
   echo "Certificate already installed: $CERT_SYSTEM/$crt_name"
-  return 0
+  exit 0
 }
 
 echo "Updating certificates in $CERT_SYSTEM..."
