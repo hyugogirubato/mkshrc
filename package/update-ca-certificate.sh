@@ -3,14 +3,16 @@
 # ==UserScript==
 # @name         update-ca-certificates
 # @namespace    https://github.com/user/mkshrc/
-# @version      1.2
+# @version      1.3
 # @description  Inject custom CA certificates into Android system trust store
 # @author       user
 # @match        Android
 # ==/UserScript==
 
 # Import helper functions (e.g. sudo wrapper) from user environment
-source "$TMPDIR/mkshrc"
+[ -d '/system/etc/bin' ] && rc_path='/system/etc/mkshrc' || rc_path="$TMPDIR/mkshrc"
+[ -d '/vendor/etc/bin' ] && rc_path='/vendor/etc/mkshrc'
+source "$rc_path"
 
 # Define certificate store locations
 CERT_APEX='/apex/com.android.conscrypt/cacerts'
