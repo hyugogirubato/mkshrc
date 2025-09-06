@@ -166,7 +166,7 @@ function restart() {
   # Verify that the current user has root privileges
   [ "$(sudo id -un 2>&1)" = 'root' ] || {
     echo 'Permission denied. Privileged user not available.'
-    exit 1
+    return 1
   }
 
   # Soft reboot via init: stop and restart the Android framework.
@@ -244,7 +244,7 @@ function frida() {
   # For start/stop commands, check for root privileges
   if echo "$1" | grep -Eq '^(-s|-k|--start|--stop|start|stop)$' && [ "$(sudo id -un 2>&1)" != 'root' ]; then
     echo 'Permission denied. Privileged user not available.'
-    exit 1
+    return 1
   fi
 
   # Handle commands/options
