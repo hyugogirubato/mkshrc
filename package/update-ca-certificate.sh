@@ -12,7 +12,7 @@
 # Import helper functions (e.g. sudo wrapper) from user environment
 [ -d '/system/etc/bin' ] && rc_path='/system/etc/mkshrc' || rc_path="$TMPDIR/mkshrc"
 [ -d '/vendor/etc/bin' ] && rc_path='/vendor/etc/mkshrc'
-source "$rc_path"
+source "$rc_path" >/dev/null 2>&1
 
 # Define certificate store locations
 CERT_APEX='/apex/com.android.conscrypt/cacerts'
