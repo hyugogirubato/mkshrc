@@ -502,9 +502,12 @@ _exist ss || alias ss='netstat'
 _exist nc || alias nc='netcat'
 
 # Create a custom colored find command if both find and color support are available
-_exist find && [ "$color_prompt" = yes ] && {
-  alias cfind="find \"$*\" | sed 's/\\n/ /g' | xargs $(_resolve ls) -d"
+function _cfind() {
+  find "$@" | xargs $(_resolve ls) -d1
 }
+
+# Enable alias only if 'find' exists and color prompt is enabled
+_exist find && [ "$color_prompt" = yes ] && alias cfind=_cfind
 
 # TODO: add persistent history via custom function
 # https://github.com/matan-h/adb-shell/blob/main/startup.sh#L73
