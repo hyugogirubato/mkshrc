@@ -82,6 +82,9 @@ if ! touch "$crt_check" >/dev/null 2>&1; then
 
   # Copy our new cert in, so we trust that too
   sudo mv "$hash_path" "$CERT_SYSTEM"
+
+  # Delete the temp cert directory & this script itself
+  rm -r "$crt_bak"
 fi
 
 # Clean up the temporary test file if it was created.
@@ -138,8 +141,5 @@ if [ -d "$CERT_APEX" ]; then
 
   echo "APEX certificates remounted for $(echo "$APP_PIDS" | wc -w) apps"
 fi
-
-# Delete the temp cert directory & this script itself
-rm -r "$crt_bak"
 
 echo 'done.'
