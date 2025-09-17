@@ -395,7 +395,7 @@ if [ "$rc_root" != "$rc_tmpfs" ]; then
     #sudo chcon u:object_r:task_profiles_file:s0 "$rc_tmpfs/task_profiles.json" >/dev/null 2>&1
 
     # Restore SELinux context for all files in tmpfs
-    sudo restorecon -R "$rc_tmpfs" >/dev/null 2>&1
+    sudo restorecon -RF "$rc_tmpfs"/* >/dev/null 2>&1
 
     echo '[I] Script mount permanently until next reboot'
   #else

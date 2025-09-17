@@ -98,7 +98,7 @@ sudo chcon -R u:object_r:system_file:s0 "$CERT_SYSTEM"
 #sudo chcon -R u:object_r:system_security_cacerts_file:s0 "$CERT_SYSTEM" >/dev/null 2>&1
 
 # Restore SELinux context for all certificate files
-sudo restorecon -R "$CERT_SYSTEM" >/dev/null 2>&1
+sudo restorecon -RF "$CERT_SYSTEM"/* >/dev/null 2>&1
 
 echo '1 added, 0 removed; done.'
 
