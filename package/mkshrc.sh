@@ -367,7 +367,7 @@ if [ "$rc_root" != "$rc_tmpfs" ]; then
     # Copy required binaries into tmpfs/bin
     rc_bin="$rc_tmpfs/bin"
     sudo mkdir -p "$rc_bin"
-    for file in busybox curl frida-server openssl libsupol.so supolicy tcpdump update-ca-certificate; do
+    for file in busybox curl frida-server openssl libsupol.so supolicy tcpdump update-ca-certificate wlan; do
       [ -f "$rc_root/bin/$file" ] && sudo cp -af "$rc_root/bin/$file" "$rc_bin/$file"
     done
 
