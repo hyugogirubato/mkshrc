@@ -27,7 +27,7 @@ crt_path="${1?'Missing certificate path'}"
 
 # Verify that the current user has root privileges
 [ "$(sudo id -un 2>&1)" = 'root' ] || {
-  echo 'Permission denied. Privileged user not available.'
+  echo 'Permission denied. Privileged user not available.' >&2
   exit 1
 }
 
