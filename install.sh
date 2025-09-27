@@ -3,7 +3,7 @@
 # ==UserScript==
 # @name         Android Environment Installer
 # @namespace    https://github.com/user/mkshrc/
-# @version      1.3
+# @version      1.4
 # @description  Install mkshrc shell environment and additional binaries on Android devices
 # @author       user
 # @match        Android
@@ -58,7 +58,10 @@ cp -f "$rc_package/$CPU_ABI/openssl/openssl" "$rc_bin/openssl"
 cp -f "$rc_package/$CPU_ABI/tcpdump/tcpdump" "$rc_bin/tcpdump"
 
 # Install script for adding root trust CA certificates
-cp "$rc_package/update-ca-certificate.sh" "$rc_bin/update-ca-certificate"
+cp -f "$rc_package/update-ca-certificate.sh" "$rc_bin/update-ca-certificate"
+
+# Install wlan utility to dump configured Wi‑Fi networks
+cp -f "$rc_package/wlan.sh" "$rc_bin/wlan"
 
 # Set ownership and permissions for installed binaries to ensure accessibility
 chown -R shell:shell "$rc_bin"
