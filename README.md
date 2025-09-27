@@ -8,6 +8,7 @@
 * Pre-packaged common tools (BusyBox, curl, OpenSSL, Frida, supolicy)
 * Auto-symlinks for BusyBox applets
 * Certificate injection helper (`update-ca-certificate`)
+* Wi‑Fi inspection tool (`wlan`) - dumps saved networks
 * Works on both rooted and non-rooted devices
 
 ## Included Binaries
@@ -65,6 +66,7 @@ source /data/local/tmp/mkshrc
 * `pull <path>` – safely copy a file from the system into `/data/local/tmp/`.
 * `frida {start|status|stop|version}` – manage the Frida server lifecycle.
 * BusyBox applets are symlinked automatically (except `man`).
+* `wlan` — show saved Wi‑Fi networks (SSID, PSK, security, hidden).
 
 ## Disclaimer
 
