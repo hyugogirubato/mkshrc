@@ -61,6 +61,9 @@ if [ "$color_prompt" = yes ]; then
   alias egrep='egrep --color=auto'
   alias logcat='logcat -v color'
   alias diff='diff --color'
+
+  # Networking commands
+  _exist ip && alias ip='ip -c'
 fi
 
 # Common shortcuts
@@ -72,12 +75,6 @@ alias reset='stty sane < /dev/tty' # restore terminal to default state
 
 # Use ps -A if it shows more processes than default ps
 [ "$(ps -A | wc -l)" -gt 1 ] && alias ps='ps -A'
-
-# Networking commands
-_exist ip && {
-  [ "$color_prompt" = yes ] && alias ip='ip -c'
-  alias ipa="$(_resolve ip) a" # Show IP addresses
-}
 
 # Sudo wrapper (works with root / su / Magisk)
 function sudo() {
@@ -487,6 +484,9 @@ fi
 
 # Provide supolicy fallback (used in Magisk contexts)
 _exist magiskpolicy || alias supolicy="LD_LIBRARY_PATH=$rc_bin $rc_bin/supolicy"
+
+# Show IP addresses
+alias ipa="$(_resolve ip) a"
 
 # Fix mksh vi mode issues when editing multi-line
 function _vi() {
