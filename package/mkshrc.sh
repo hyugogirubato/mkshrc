@@ -76,6 +76,9 @@ alias reset='stty sane < /dev/tty' # restore terminal to default state
 # Use ps -A if it shows more processes than default ps
 [ "$(ps -A | wc -l)" -gt 1 ] && alias ps='ps -A'
 
+# Provide a convenient poweroff command if not available
+_exist poweroff || alias poweroff='reboot -p'
+
 # Sudo wrapper (works with root / su / Magisk)
 function sudo() {
   [ $# -eq 0 ] && {
