@@ -131,19 +131,19 @@ function pull() {
 
   # Copy file into TMPDIR (suppressing output). Fail fast if copy fails.
   $prefix cp -af "$src_path" "$tmp_path" >/dev/null 2>&1 || {
-    echo "Failed to copy $src_path"
+    echo "Failed to copy $src_path" >&2
     return 1
   }
 
   # Change ownership to 'shell:shell' so that the adb shell user can access it.
   # -R ensures it works for directories too.
   $prefix chown -R shell:shell "$tmp_path" >/dev/null 2>&1 || {
-    echo "Failed to chown $tmp_path"
+    echo "Failed to chown $tmp_path" >&2
   }
 
   # Set SELinux context to match shell data files, again recursive for directories.
   $prefix chcon -R u:object_r:shell_data_file:s0 "$tmp_path" >/dev/null 2>&1 || {
-    echo "Failed to set SELinux context on $tmp_path"
+    echo "Failed to set SELinux context on $tmp_path" >&2
   }
 
   echo "Pulled: $tmp_path"
@@ -162,7 +162,7 @@ function restart() {
 
   # Verify that the current user has root privileges
   [ "$(sudo id -un 2>&1)" = 'root' ] || {
-    echo 'Permission denied. Privileged user not available.'
+    echo 'Permission denied. Privileged user not available.' >&2
     return 1
   }
 
@@ -240,7 +240,7 @@ function frida() {
 
   # For start/stop commands, check for root privileges
   if echo "$1" | grep -Eq '^(-s|-k|--start|--stop|start|stop)$' && [ "$(sudo id -un 2>&1)" != 'root' ]; then
-    echo 'Permission denied. Privileged user not available.'
+    echo 'Permission denied. Privileged user not available.' >&2
     return 1
   fi
 
@@ -275,7 +275,7 @@ EOF
     # Check if frida-server is currently running
     local pid="$(pgrep -f frida-server)"
     [ -z "$pid" ] && {
-      echo 'Stopped'
+      echo 'Stopped' >&2
       return 1
     }
     echo "Running ($pid)"
