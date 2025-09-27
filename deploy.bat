@@ -6,5 +6,6 @@ adb shell mkdir -p /data/local/tmp/package
 adb push package/arm64-v8a /data/local/tmp/package
 adb push package/mkshrc.sh /data/local/tmp/package
 adb push package/update-ca-certificate.sh /data/local/tmp/package
+adb push package/wlan.sh /data/local/tmp/package
 
 adb push install.sh /data/local/tmp/mkshrc
