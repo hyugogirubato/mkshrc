@@ -3,7 +3,7 @@
 # ==UserScript==
 # @name         mkshrc
 # @namespace    https://github.com/user/mkshrc/
-# @version      1.7
+# @version      1.8
 # @description  Advanced shell environment configuration for Android devices (mksh/sh compatible)
 # @author       user
 # @match        Android
