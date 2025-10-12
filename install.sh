@@ -56,6 +56,8 @@ cp -f "$rc_package/$CPU_ABI/curl/curl" "$rc_bin/curl"
 cp -f "$rc_package/$CPU_ABI/openssl/openssl" "$rc_bin/openssl"
 # https://android.googlesource.com/platform/external/tcpdump.git/+/refs/heads/android14-qpr2-release/INSTALL.md
 cp -f "$rc_package/$CPU_ABI/tcpdump/tcpdump" "$rc_bin/tcpdump"
+# https://github.com/EXALAB/sqlite3-android
+cp -f "$rc_package/$CPU_ABI/sqlite3/sqlite3" "$rc_bin/sqlite3"
 
 # Install script for adding root trust CA certificates
 cp -f "$rc_package/update-ca-certificate.sh" "$rc_bin/update-ca-certificate"
