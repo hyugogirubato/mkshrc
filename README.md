@@ -32,7 +32,7 @@
    adb push install.sh /data/local/tmp/mkshrc
    ```
 
-   (An included `install.bat` automates this on Windows)
+   (An included `deploy.bat` automates this on Windows)
 
 2. Open a shell on your device:
 
