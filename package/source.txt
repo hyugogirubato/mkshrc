@@ -22,3 +22,4 @@ https://github.com/EXALAB/sqlite3-android/blob/master/binary/x86_64/sqlite3
 [DEV]
 https://www.busybox.net/
 https://raw.githubusercontent.com/sycomix/AutoRoot/refs/heads/main/AutoRoot.py
+https://github.com/termux/termux-packages/releases
