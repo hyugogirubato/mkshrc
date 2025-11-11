@@ -3,7 +3,7 @@
 # ==UserScript==
 # @name         wlan
 # @namespace    https://github.com/user/mkshrc/
-# @version      1.0
+# @version      1.1
 # @description  Extract configured Wi-Fi networks (XML or wpa_supplicant)
 # @author       user
 # @match        Android
@@ -42,6 +42,7 @@ done
 # Extract SSID, PSK, security, and hidden flag depending on format
 if echo "$content" | grep -q '^<?xml'; then
   # XML format (WifiConfigStore.xml)
+  # https://blog.digital-forensics.it/2024/02/dissecting-android-wificonfigstorexml.html
   ssid_list="$(echo "$content" | grep '<string name="SSID">' | sed -E 's/.*&quot;([^&]+)&quot;.*/\1/')"
   psk_list=$(echo "$content" | grep -E '<string name="PreSharedKey">|<null name="PreSharedKey"' | sed -E 's/.*<string name="PreSharedKey">&quot;([^&]*)&quot;.*/\1/; t; s/.*<null name="PreSharedKey".*/NONE/')
   sec_list="$(echo "$content" | grep '<string name="ConfigKey">' | sed -E 's/.*&quot;[^&]+&quot;([A-Z_]+).*/\1/')"
@@ -53,6 +54,11 @@ else
   psk_list=$(echo "$content" | grep -E '^\s*psk=|^\s*key_mgmt=NONE' | sed -E 's/^\s*psk="?(.*)"?/\1/; t; s/.*/NONE/')
   sec_list=$(echo "$content" | grep -E '^\s*key_mgmt=' | sed -E 's/^\s*key_mgmt=(.*)/\1/')
   hidden_list=$(echo "$content" | grep -E '^\s*scan_ssid=' | sed -E 's/^\s*scan_ssid=([01])/\1/; t; s/.*/0/' | sed -E 's/1/true/; s/0/false/')
+fi
+
+if [ -z "$ssid_list" ]; then
+  echo 'No registered Wi-Fi networks found.' >&2
+  exit 2
 fi
 
 # Output each network line by line
