@@ -3,7 +3,7 @@
 # ==UserScript==
 # @name         update-ca-certificates
 # @namespace    https://github.com/user/mkshrc/
-# @version      1.3
+# @version      1.4
 # @description  Inject custom CA certificates into Android system trust store
 # @author       user
 # @match        Android
@@ -61,7 +61,7 @@ openssl x509 -in "$crt_path" -fingerprint -text -noout >>"$hash_path"
 crt_check="$CERT_SYSTEM/00000000.0"
 
 # If the directory is not writable (touch fails) we need to remount it:
-if ! touch "$crt_check" >/dev/null 2>&1; then
+if ! sudo touch "$crt_check" >/dev/null 2>&1; then
   # https://github.com/httptoolkit/httptoolkit-server/blob/main/src/interceptors/android/adb-commands.ts#L417
   # Create a separate temp directory, to hold the current certificates
   # Without this, when we add the mount we can't read the current certs anymore.
@@ -80,15 +80,15 @@ if ! touch "$crt_check" >/dev/null 2>&1; then
   # Copy the existing certs back into the tmpfs mount, so we keep trusting them
   sudo cp -af "$crt_bak"/* "$CERT_SYSTEM"
 
-  # Copy our new cert in, so we trust that too
-  sudo mv "$hash_path" "$CERT_SYSTEM"
-
   # Delete the temp cert directory & this script itself
-  rm -r "$crt_bak"
+  rm -rf "$crt_bak"
 fi
 
 # Clean up the temporary test file if it was created.
 sudo rm -rf "$crt_check"
+
+# Copy our new cert in, so we trust that too
+sudo mv "$hash_path" "$CERT_SYSTEM"
 
 # Update the perms & selinux context labels, so everything is as readable as before
 sudo chown -R root:root "$CERT_SYSTEM"
