@@ -405,7 +405,7 @@ if [ "$rc_root" != "$rc_tmpfs" ]; then
 
   rc_root="$rc_tmpfs"
 else
-  echo '[E] RC in persistent mode unavailable'
+  echo '[E] RC in persistent mode unavailable' >&2
   echo '[W] Script sets for current shell context only'
 fi
 
@@ -521,7 +521,8 @@ rm -rf "$env_check"
 
 # Disable Samsung Service Provider Update notifications and background tasks
 # https://xdaforums.com/t/solved-constant-service-provider-update-popup-after-upgrading-to-android-14-rooted-using-magisk.4658043/
-# pm disable-user --user 0 com.samsung.android.cidmanager
+# pm list packages -e | grep 'cidmanager' && pm disable-user --user 0 com.samsung.android.cidmanager
+# pm enable --user 0 com.samsung.android.cidmanager
 
 # TODO: add persistent history via custom function
 # https://github.com/matan-h/adb-shell/blob/main/startup.sh#L73
