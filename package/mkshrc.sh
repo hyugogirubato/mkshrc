@@ -3,7 +3,7 @@
 # ==UserScript==
 # @name         mkshrc
 # @namespace    https://github.com/user/mkshrc/
-# @version      1.8
+# @version      1.9
 # @description  Advanced shell environment configuration for Android devices (mksh/sh compatible)
 # @author       user
 # @match        Android
@@ -512,5 +512,10 @@ function _cfind() {
 # Enable alias only if 'find' exists and color prompt is enabled
 _exist find && [ "$color_prompt" = yes ] && alias cfind=_cfind
 
+# Extract exported vars from init.environ.rc and source them into the current shell
+env_check="$TMPDIR/env.rc"
+sudo cat '/init.environ.rc' 2>&1 | grep -- '^ *export ' | awk '{print "export "$2"="$3}' > "$env_check"
+source "$env_check" >/dev/null 2>&1
+rm -rf "$env_check"
 # TODO: add persistent history via custom function
 # https://github.com/matan-h/adb-shell/blob/main/startup.sh#L73
