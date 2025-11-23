@@ -45,6 +45,7 @@ export USER="$(id -u -n)"              # Current username
 export LOGNAME="$USER"                 # Ensure LOGNAME matches USER
 export TMPDIR='/data/local/tmp'        # Temporary directory
 export STORAGE='/storage/self/primary' # Default shared storage (internal)
+export HOME='/'                        # Default home directory for shell user
 
 ###############################################################################
 ### Aliases and Quality of Life Shortcuts
@@ -517,5 +518,10 @@ env_check="$TMPDIR/env.rc"
 sudo cat '/init.environ.rc' 2>&1 | grep -- '^ *export ' | awk '{print "export "$2"="$3}' > "$env_check"
 source "$env_check" >/dev/null 2>&1
 rm -rf "$env_check"
+
+# Disable Samsung Service Provider Update notifications and background tasks
+# https://xdaforums.com/t/solved-constant-service-provider-update-popup-after-upgrading-to-android-14-rooted-using-magisk.4658043/
+# pm disable-user --user 0 com.samsung.android.cidmanager
+
 # TODO: add persistent history via custom function
 # https://github.com/matan-h/adb-shell/blob/main/startup.sh#L73
