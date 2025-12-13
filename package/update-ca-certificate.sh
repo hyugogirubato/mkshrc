@@ -62,7 +62,7 @@ crt_check="$CERT_SYSTEM/00000000.0"
 
 # If the directory is not writable (touch fails) we need to remount it:
 if ! sudo touch "$crt_check" >/dev/null 2>&1; then
-  # https://github.com/httptoolkit/httptoolkit-server/blob/main/src/interceptors/android/adb-commands.ts#L417
+  # https://github.com/httptoolkit/httptoolkit-server/blob/main/src/interceptors/android/adb-commands.ts#L427
   # Create a separate temp directory, to hold the current certificates
   # Without this, when we add the mount we can't read the current certs anymore.
   crt_bak="$(mktemp -d)"
