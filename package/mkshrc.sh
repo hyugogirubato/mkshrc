@@ -3,7 +3,7 @@
 # ==UserScript==
 # @name         mkshrc
 # @namespace    https://github.com/user/mkshrc/
-# @version      1.9
+# @version      2.0
 # @description  Advanced shell environment configuration for Android devices (mksh/sh compatible)
 # @author       user
 # @match        Android
@@ -568,4 +568,3 @@ fi
 
 # TODO: add persistent history via custom function
 # https://github.com/matan-h/adb-shell/blob/main/startup.sh#L73
-# https://github.com/SolidEva/multidisabler-samsung-keep-encryption/blob/master/META-INF/com/google/android/update-binary
