@@ -526,3 +526,4 @@ rm -rf "$env_check"
 
 # TODO: add persistent history via custom function
 # https://github.com/matan-h/adb-shell/blob/main/startup.sh#L73
+# https://github.com/SolidEva/multidisabler-samsung-keep-encryption/blob/master/META-INF/com/google/android/update-binary
