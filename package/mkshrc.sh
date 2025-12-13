@@ -519,16 +519,39 @@ sudo cat '/init.environ.rc' 2>&1 | grep -- '^ *export ' | awk '{print "export "$
 source "$env_check" >/dev/null 2>&1
 rm -rf "$env_check"
 
-# Disable Samsung Service Provider Update notifications and background tasks
 # https://xdaforums.com/t/solved-constant-service-provider-update-popup-after-upgrading-to-android-14-rooted-using-magisk.4658043/
-# pm list packages -e | grep 'cidmanager' && pm disable-user --user 0 com.samsung.android.cidmanager
-# pm enable --user 0 com.samsung.android.cidmanager
+_disable 'com.samsung.android.cidmanager' # Samsung CID / device identification & enrollment manager
 
 # https://www.protectstar.com/fr/blog/appcloud-aura-how-invasive-bloatware-spies-on-samsung-users-in-wana
 _disable 'com.ironsource.appcloud.oobe'              # IronSource AppCloud OOBE (Sprint / generic operator variants)
 _disable 'com.aura.oobe.samsung.gl'                  # Samsung Aura / IronSource OOBE variant (Samsung global)
 _disable 'com.ironsource.appcloud.store.lg.vr'       # IronSource AppCloud store (LG / VR variant)
 _disable 'com.ironsource.appcloud.appstore.airtelug' # IronSource AppCloud store (Airtel Uganda operator variant)
+
+# Check if the device brand is Samsung
+# This prevents running Knox-related commands on non-Samsung devices
+if [ "$(getprop ro.product.brand)" = 'samsung' ]; then
+  # https://github.com/SolidEva/multidisabler-samsung-keep-encryption/blob/master/META-INF/com/google/android/update-binary
+  # Stop the VaultKeeper service
+  # VaultKeeper is part of Samsung Knox and communicates with the secure TEE
+  # After bootloader unlock, it often fails and spams logcat with errors
+  sudo stop vaultkeeper >/dev/null 2>&1
+
+  # Stop the VaultKeeper HAL service (if present on this firmware)
+  # This is the hardware abstraction layer interface for VaultKeeper
+  # Not all Samsung devices expose this service name
+  sudo stop vaultkeeper_hal >/dev/null 2>&1
+
+  # Stop CASS (Context-Aware Security Service)
+  # CASS repeatedly checks Knox / VaultKeeper state and retries on failure
+  # This is a major source of repeated error logs and wakeup
+  sudo stop cass >/dev/null 2>&1
+
+  # Stop PROCA (Process Authentication / Runtime Check Agent)
+  # PROCA is used by Samsung to monitor process integrity
+  # It may interfere with injected or debugged processes
+  sudo stop proca >/dev/null 2>&1
+fi
 
 # TODO: add persistent history via custom function
 # https://github.com/matan-h/adb-shell/blob/main/startup.sh#L73
