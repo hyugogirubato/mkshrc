@@ -110,7 +110,7 @@ if [ -d "$CERT_APEX" ]; then
   # this globally as APEX mounts are namespaced per process, so we need to inject a
   # bind mount for this directory into every mount namespace.
 
-  # First we mount for the shell itself, for completeness and so we can see this
+  # First we mount for the shell itself, for completeness, and so we can see this
   # when we check for correct installation on later runs
   sudo mount --bind "$CERT_SYSTEM" "$CERT_APEX"
 
