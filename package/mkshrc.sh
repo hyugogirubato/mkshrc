@@ -524,6 +524,12 @@ rm -rf "$env_check"
 # pm list packages -e | grep 'cidmanager' && pm disable-user --user 0 com.samsung.android.cidmanager
 # pm enable --user 0 com.samsung.android.cidmanager
 
+# https://www.protectstar.com/fr/blog/appcloud-aura-how-invasive-bloatware-spies-on-samsung-users-in-wana
+_disable 'com.ironsource.appcloud.oobe'              # IronSource AppCloud OOBE (Sprint / generic operator variants)
+_disable 'com.aura.oobe.samsung.gl'                  # Samsung Aura / IronSource OOBE variant (Samsung global)
+_disable 'com.ironsource.appcloud.store.lg.vr'       # IronSource AppCloud store (LG / VR variant)
+_disable 'com.ironsource.appcloud.appstore.airtelug' # IronSource AppCloud store (Airtel Uganda operator variant)
+
 # TODO: add persistent history via custom function
 # https://github.com/matan-h/adb-shell/blob/main/startup.sh#L73
 # https://github.com/SolidEva/multidisabler-samsung-keep-encryption/blob/master/META-INF/com/google/android/update-binary
