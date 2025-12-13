@@ -515,7 +515,7 @@ _exist find && [ "$color_prompt" = yes ] && alias cfind=_cfind
 
 # Extract exported vars from init.environ.rc and source them into the current shell
 env_check="$TMPDIR/env.rc"
-sudo cat '/init.environ.rc' 2>&1 | grep -- '^ *export ' | awk '{print "export "$2"="$3}' > "$env_check"
+sudo cat '/init.environ.rc' 2>&1 | grep -- '^ *export ' | awk '{print "export "$2"="$3}' >"$env_check"
 source "$env_check" >/dev/null 2>&1
 rm -rf "$env_check"
 
