@@ -35,6 +35,19 @@ function _resolve() {
   echo "$binary" | sed "s/^'\(.*\)'$/\1/"
 }
 
+# Disable a package for user 0 (hide app without removing APK)
+function _disable() {
+  pm disable-user --user 0 "$1" >/dev/null 2>&1
+  #pm uninstall -k --user 0 "$1" >/dev/null 2>&1 # stronger, reversible
+}
+
+# Enable a previously disabled or uninstalled package for user 0
+# Restores the app using the existing system APK
+function _enable() {
+  pm enable --user 0 "$1" >/dev/null 2>&1
+  #pm install-existing --user 0 "$1" >/dev/null 2>&1 # restore uninstalled
+}
+
 ###############################################################################
 ### Environment Setup
 ###############################################################################
