@@ -3,7 +3,7 @@
 # ==UserScript==
 # @name         Android Environment Installer
 # @namespace    https://github.com/user/mkshrc/
-# @version      1.4
+# @version      1.5
 # @description  Install mkshrc shell environment and additional binaries on Android devices
 # @author       user
 # @match        Android
@@ -12,7 +12,7 @@
 # Configurations
 TMPDIR='/data/local/tmp'
 CPU_ABI="$(getprop ro.product.cpu.abi)"
-FRIDA=${1:-'16.7.19'} # Default Frida version if not provided
+FRIDA=${1:-'17.5.1'} # Default Frida version if not provided
 
 rc_package="$TMPDIR/package" # Source package folder
 rc_bin="$TMPDIR/bin"         # Destination folder for binaries

@@ -18,7 +18,7 @@
 | BusyBox      | 1.36.1.1                  | Multi-call binary with core tools |
 | OpenSSL      | 1.1.1l (NDK 23.0.7599858) | Cryptography and TLS toolkit      |
 | cURL         | 7.78.0 (NDK 23.0.7599858) | Command-line HTTP/HTTPS client    |
-| frida-server | 17.2.17, 16.7.9           | Dynamic instrumentation toolkit   |
+| frida-server | 17.5.1, 16.7.9            | Dynamic instrumentation toolkit   |
 | Supolicy     | 2.82                      | SELinux policy helper             |
 | Tcpdump      | 4.9.2 (NDK 18.1.5063045)  | Network packet analyzer           |
 | SQLite       | 3.22.0 (NDK 16.1.4479499) | Command-line database utility     |
