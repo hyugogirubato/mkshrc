@@ -3,7 +3,7 @@
 # ==UserScript==
 # @name         update-ca-certificates
 # @namespace    https://github.com/user/mkshrc/
-# @version      1.4
+# @version      1.5
 # @description  Inject custom CA certificates into Android system trust store
 # @author       user
 # @match        Android
@@ -17,6 +17,17 @@ source "$rc_path" >/dev/null 2>&1
 # Define certificate store locations
 CERT_APEX='/apex/com.android.conscrypt/cacerts'
 CERT_SYSTEM='/system/etc/security/cacerts'
+
+# Bind system certs into the mount namespace of the given process
+function mntns() {
+  local NS="/proc/$1/ns/mnt"
+
+  # Check if CERT_APEX is already mounted in this namespace
+  if ! sudo nsenter --mount="$NS" -- /bin/mount | grep -q -- " $CERT_APEX "; then
+    # Bind-mount system certs into the APEX cert directory
+    sudo nsenter --mount="$NS" -- /bin/mount --bind "$CERT_SYSTEM" "$CERT_APEX"
+  fi
+}
 
 # Input certificate sanity check
 crt_path="${1?'Missing certificate path'}"
@@ -112,7 +123,9 @@ if [ -d "$CERT_APEX" ]; then
 
   # First we mount for the shell itself, for completeness, and so we can see this
   # when we check for correct installation on later runs
-  sudo mount --bind "$CERT_SYSTEM" "$CERT_APEX"
+  if ! mount | grep -q -- " $CERT_APEX "; then
+    sudo mount --bind "$CERT_SYSTEM" "$CERT_APEX" 2>/dev/null || true
+  fi
 
   # First we get the Zygote process(es), which launch each app
   ZYGOTE_PID=$(pidof zygote || true)
@@ -123,7 +136,7 @@ if [ -d "$CERT_APEX" ]; then
   # Apps inherit the Zygote's mounts at startup, so we inject here to ensure all newly
   # started apps will see these certs straight away:
   for Z_PID in $Z_PIDS; do
-    [ -n "$Z_PID" ] && sudo nsenter --mount="/proc/$Z_PID/ns/mnt" -- /bin/mount --bind "$CERT_SYSTEM" "$CERT_APEX"
+    [ -n "$Z_PID" ] && mntns "$Z_PID" >/dev/null 2>&1
   done
 
   echo 'Zygote APEX certificates remounted'
@@ -133,13 +146,38 @@ if [ -d "$CERT_APEX" ]; then
   # Get the PID of every process whose parent is one of the Zygotes:
   APP_PIDS=$(echo "$Z_PIDS" | xargs -n1 ps -o PID -P | grep -v PID)
 
-  # Inject into the mount namespace of each of those apps:
-  for PID in $APP_PIDS; do
-    (sudo nsenter --mount="/proc/$PID/ns/mnt" -- /bin/mount --bind "$CERT_SYSTEM" "$CERT_APEX") &
-  done
-  wait # Launched in parallel - wait for completion here
+  # Inject into the mount namespace of each of those processes.
+  # We do this in small batches to avoid overloading weak kernels:
+  # - Full parallel nsenter can trigger hangs or soft reboots on some devices
+  # - Sequential injection is safe but slow
+  # - Batched execution provides a good balance between speed and stability
 
-  echo "APEX certificates remounted for $(echo "$APP_PIDS" | wc -w) apps"
+  # Maximum number of concurrent nsenter operations
+  MAX_JOBS=4
+
+  job_count=0 # Number of active background jobs in the current batch
+  app_count=0 # Total number of processes successfully targeted
+  for PID in $APP_PIDS; do
+    # Skip processes that exited between enumeration and injection
+    [ -d "/proc/$PID" ] || continue
+
+    # Inject the bind mount into this process's mount namespace
+    (mntns "$PID" >/dev/null 2>&1) &
+
+    job_count=$((job_count + 1))
+    app_count=$((app_count + 1))
+
+    # When the batch limit is reached, wait for all jobs to complete
+    if [ "$job_count" -ge "$MAX_JOBS" ]; then
+      wait
+      job_count=0
+    fi
+  done
+
+  # Wait for any remaining background jobs
+  wait
+
+  echo "APEX certificates remounted for $app_count apps"
 fi
 
 echo 'done.'
