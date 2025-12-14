@@ -560,6 +560,7 @@ if [ "$(getprop ro.product.brand)" = 'samsung' ]; then
   # This is a major source of repeated error logs and wakeup
   sudo stop cass >/dev/null 2>&1
 
+  # https://googleprojectzero.blogspot.com/2020/02/mitigations-are-attack-surface-too.html
   # Stop PROCA (Process Authentication / Runtime Check Agent)
   # PROCA is used by Samsung to monitor process integrity
   # It may interfere with injected or debugged processes
