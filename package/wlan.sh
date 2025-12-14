@@ -28,7 +28,7 @@ WIFI_WPA='/data/misc/wif/wpa_supplicant.conf'
 # Read Wi-Fi configuration from the first available path
 content=''
 for path in "$WIFI_APEX" "$WIFI_STORE" "$WIFI_WPA"; do
-  if sudo stat "$path" >/dev/null 2>&1; then
+  if sudo test -e "$path"; then
     echo "Using Wi-Fi configuration from: $path"
     content="$(sudo cat "$path")" && break
   fi
