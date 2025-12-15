@@ -3,7 +3,7 @@
 # ==UserScript==
 # @name         update-ca-certificates
 # @namespace    https://github.com/user/mkshrc/
-# @version      1.5
+# @version      1.6
 # @description  Inject custom CA certificates into Android system trust store
 # @author       user
 # @match        Android
@@ -22,8 +22,11 @@ CERT_SYSTEM='/system/etc/security/cacerts'
 function mntns() {
   local NS="/proc/$1/ns/mnt"
 
+  # Capture mount list from target namespace (empty if nsenter fails)
+  local mounts="$(sudo nsenter --mount="$NS" -- /bin/mount 2>/dev/null || true)"
+
   # Check if CERT_APEX is already mounted in this namespace
-  if ! sudo nsenter --mount="$NS" -- /bin/mount | grep -q -- " $CERT_APEX "; then
+  if [ -n "$mounts" ] && ! echo "$mounts" | grep -q -- " $CERT_APEX "; then
     # Bind-mount system certs into the APEX cert directory
     sudo nsenter --mount="$NS" -- /bin/mount --bind "$CERT_SYSTEM" "$CERT_APEX"
   fi
@@ -61,7 +64,7 @@ crt_name="$crt_hash.0"
 
 echo "Updating certificates in $CERT_SYSTEM..."
 
-# https://github.com/user/JustTrustMe
+# https://github.com/Fuzion24/JustTrustMe
 # Prepare new certificate file
 hash_path="$TMPDIR/$crt_name"
 openssl x509 -in "$crt_path" >"$hash_path"
@@ -156,16 +159,11 @@ if [ -d "$CERT_APEX" ]; then
   MAX_JOBS=4
 
   job_count=0 # Number of active background jobs in the current batch
-  app_count=0 # Total number of processes successfully targeted
   for PID in $APP_PIDS; do
-    # Skip processes that exited between enumeration and injection
-    [ -d "/proc/$PID" ] || continue
-
     # Inject the bind mount into this process's mount namespace
     (mntns "$PID" >/dev/null 2>&1) &
 
     job_count=$((job_count + 1))
-    app_count=$((app_count + 1))
 
     # When the batch limit is reached, wait for all jobs to complete
     if [ "$job_count" -ge "$MAX_JOBS" ]; then
@@ -177,7 +175,7 @@ if [ -d "$CERT_APEX" ]; then
   # Wait for any remaining background jobs
   wait
 
-  echo "APEX certificates remounted for $app_count apps"
+  echo "APEX certificates remounted for $(echo "$APP_PIDS" | wc -w ) apps"
 fi
 
 echo 'done.'
