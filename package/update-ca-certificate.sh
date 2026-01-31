@@ -3,7 +3,7 @@
 # ==UserScript==
 # @name         update-ca-certificates
 # @namespace    https://github.com/user/mkshrc/
-# @version      1.6
+# @version      1.7
 # @description  Inject custom CA certificates into Android system trust store
 # @author       user
 # @match        Android
@@ -70,12 +70,8 @@ hash_path="$TMPDIR/$crt_name"
 openssl x509 -in "$crt_path" >"$hash_path"
 openssl x509 -in "$crt_path" -fingerprint -text -noout >>"$hash_path"
 
-# Temporary file path we'll use to check writability of the system cert dir.
-# If we can successfully create this file, we know CERT_SYSTEM is writable.
-crt_check="$CERT_SYSTEM/00000000.0"
-
 # If the directory is not writable (touch fails) we need to remount it:
-if ! sudo touch "$crt_check" >/dev/null 2>&1; then
+if [ ! -w "$CERT_SYSTEM" ]; then
   # https://github.com/httptoolkit/httptoolkit-server/blob/main/src/interceptors/android/adb-commands.ts#L427
   # Create a separate temp directory, to hold the current certificates
   # Without this, when we add the mount we can't read the current certs anymore.
@@ -97,9 +93,6 @@ if ! sudo touch "$crt_check" >/dev/null 2>&1; then
   # Delete the temp cert directory & this script itself
   rm -rf "$crt_bak"
 fi
-
-# Clean up the temporary test file if it was created.
-sudo rm -rf "$crt_check"
 
 # Copy our new cert in, so we trust that too
 sudo mv "$hash_path" "$CERT_SYSTEM"
@@ -175,7 +168,7 @@ if [ -d "$CERT_APEX" ]; then
   # Wait for any remaining background jobs
   wait
 
-  echo "APEX certificates remounted for $(echo "$APP_PIDS" | wc -w ) apps"
+  echo "APEX certificates remounted for $(echo "$APP_PIDS" | wc -w) apps"
 fi
 
 echo 'done.'
