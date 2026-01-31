@@ -3,7 +3,7 @@
 # ==UserScript==
 # @name         mkshrc
 # @namespace    https://github.com/user/mkshrc/
-# @version      2.0
+# @version      2.1
 # @description  Advanced shell environment configuration for Android devices (mksh/sh compatible)
 # @author       user
 # @match        Android
@@ -346,8 +346,11 @@ SYSTEM_RC='/system/etc'
 VENDOR_RC='/vendor/etc'
 DEFAULT_RC="$TMPDIR"
 
-# Detect where to install mkshrc based on privilege
+# Detect where to install mkshrc based on privilege and layout
 function _detect() {
+  [ -d "$SYSTEM_RC/bin" ] && echo "$SYSTEM_RC" && return
+  [ -d "$VENDOR_RC/bin" ] && echo "$VENDOR_RC" && return
+
   if [ "$(sudo id -un 2>&1)" = 'root' ]; then
     [ -f "$SYSTEM_RC/mkshrc" ] && echo "$SYSTEM_RC" && return
     [ -f "$VENDOR_RC/mkshrc" ] && echo "$VENDOR_RC" && return
@@ -527,10 +530,12 @@ function _cfind() {
 _exist find && [ "$color_prompt" = yes ] && alias cfind=_cfind
 
 # Extract exported vars from init.environ.rc and source them into the current shell
-env_check="$TMPDIR/env.rc"
-sudo cat '/init.environ.rc' 2>&1 | grep -- '^ *export ' | awk '{print "export "$2"="$3}' >"$env_check"
-source "$env_check" >/dev/null 2>&1
-rm -rf "$env_check"
+if [ -z "$EXTERNAL_STORAGE" ]; then
+  env_check="$TMPDIR/env.rc"
+  sudo cat '/init.environ.rc' 2>&1 | grep -- '^ *export ' | awk '{print "export "$2"="$3}' >"$env_check"
+  source "$env_check" >/dev/null 2>&1
+  rm -rf "$env_check"
+fi
 
 # https://xdaforums.com/t/solved-constant-service-provider-update-popup-after-upgrading-to-android-14-rooted-using-magisk.4658043/
 _disable 'com.samsung.android.cidmanager' # Samsung CID / device identification & enrollment manager
