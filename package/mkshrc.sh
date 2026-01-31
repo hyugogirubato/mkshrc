@@ -551,25 +551,31 @@ _disable 'com.ironsource.appcloud.appstore.airtelug' # IronSource AppCloud store
 if [ "$(getprop ro.product.brand)" = 'samsung' ]; then
   # https://github.com/SolidEva/multidisabler-samsung-keep-encryption/blob/master/META-INF/com/google/android/update-binary
   # Stop the VaultKeeper service
-  # VaultKeeper is part of Samsung Knox and communicates with the secure TEE
+  # VaultKeeper is part of Samsung Knox and communicates with the secure TEE.
   # After bootloader unlock, it often fails and spams logcat with errors
-  sudo stop vaultkeeper >/dev/null 2>&1
+  [ "$(getprop init.svc.vaultkeeper)" = 'running' ] && sudo stop vaultkeeper >/dev/null 2>&1
 
-  # Stop the VaultKeeper HAL service (if present on this firmware)
-  # This is the hardware abstraction layer interface for VaultKeeper
-  # Not all Samsung devices expose this service name
-  sudo stop vaultkeeper_hal >/dev/null 2>&1
+  # Stop the VaultKeeper AIDL service (newer Samsung firmware)
+  # On modern devices, VaultKeeper is exposed via an AIDL-based service
+  # instead of (or in addition to) the legacy HAL interface.
+  [ "$(getprop init.svc.vaultkeeper_aidl)" = 'running' ] && sudo stop vaultkeeper_aidl >/dev/null 2>&1
+
+  # Stop the legacy VaultKeeper HAL service (older firmware)
+  # Some devices still register VaultKeeper as a HIDL/HAL service.
+  # This is mutually exclusive with the AIDL variant on most builds,
+  # but both checks are kept for maximum firmware compatibility.
+  [ "$(getprop init.svc.vaultkeeper_hal)" = 'running' ] && sudo stop vaultkeeper_hal >/dev/null 2>&1
 
   # Stop CASS (Context-Aware Security Service)
   # CASS repeatedly checks Knox / VaultKeeper state and retries on failure
   # This is a major source of repeated error logs and wakeup
-  sudo stop cass >/dev/null 2>&1
+  [ "$(getprop init.svc.cass)" = 'running' ] && sudo stop cass >/dev/null 2>&1
 
   # https://googleprojectzero.blogspot.com/2020/02/mitigations-are-attack-surface-too.html
   # Stop PROCA (Process Authentication / Runtime Check Agent)
-  # PROCA is used by Samsung to monitor process integrity
-  # It may interfere with injected or debugged processes
-  sudo stop proca >/dev/null 2>&1
+  # PROCA enforces Samsung process integrity checks and runtime validation.
+  # It may interfere with debugging, instrumentation, or injected code.
+  [ "$(getprop init.svc.proca)" = 'running' ] && sudo stop proca >/dev/null 2>&1
 fi
 
 # TODO: add persistent history via custom function
